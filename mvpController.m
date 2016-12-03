@@ -45,7 +45,7 @@ classdef mvpController < handle
             cmd = this.parseCommand(cmd, val);
             try
                 assert(strcmp(this.comPort.Status,'open'));
-disp(cmd);
+                disp(cmd);
                 fprintf(this.comPort, cmd);
                 %pause(0.1);
             catch ME
@@ -59,13 +59,20 @@ disp(cmd);
   
         function [moved, pos, status] = move(this, displacement, vel, accel)
             %TODO return only moved
+            if nargin == 4
+                prefix = {'LA', 'SP', 'AC'};
+                cmd = [displacement, vel, accel];
+            elseif nargin == 3
+                prefix = {'LA', 'SP'};
+                cmd = [displacement, vel];
+            else
+                prefix = {'LA'};
+                cmd = [displacement];
+            end
             
             % parse & write command
-            this.writeCmd('EN');
-            this.writeCmd('HO');
-            prefix = {'LA', 'SP', 'AC'};
-            cmd = [displacement, vel, accel];
-            for t = 1:3
+            
+            for t = 1:(nargin-1)
                 this.writeCmd(char(prefix(t)), cmd(t));
             end
             % write move cmd and get status;
@@ -79,6 +86,17 @@ disp(cmd);
             % status = fscanf(this.comPort);
             moved = 1;            
         end
+        
+        function connect(this)
+            this.writeCmd('HO');
+        end
+        
+        function enableMotor(this)
+            this.writeCmd('EN');
+        end
+        
+        function 
+        
     end
 end
         
