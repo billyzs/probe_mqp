@@ -22,7 +22,7 @@ function varargout = mainGUI(varargin)
 
     % Edit the above text to modify the response to help mainGUI
 
-    % Last Modified by GUIDE v2.5 01-Nov-2011 11:18:31
+    % Last Modified by GUIDE v2.5 12-Dec-2016 15:26:33
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -74,12 +74,11 @@ function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % starting the object will make GETSNAPSHOT return faster
     % since the connection to the camera will already have
     % been established.
-    handles.video = videoinput('dcam');
-    handles.video
-    %set(handles.video,'TimerPeriod', 0.05, 'TimerFcn',@videoTimerCallback);
-    %triggerconfig(handles.video,'manual');
-    %handles.video.FramesPerTrigger = Inf; % Capture frames until we manually stop it
-
+    try 
+        handles.video = videoinput('gentl');
+    catch ex
+        set(handles.startStopCamera,'Enable','off');
+    end    
     
     % Update handles structure
     guidata(hObject, handles);
@@ -89,18 +88,6 @@ function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % NOT SURE IF THIS MATTERS BUT IT WAS NOT WORKING !!!
      %uiwait(handles.mainGUI, 15);
 end
-
-function videoTimerCallback(vid, ~)
-    if(~isempty(gco))        
-        handles = guidata(gcf); % Update handles
-        image(getsnapshot(handles.video)); % Get picture using GETSNAPSHOT and put it into axes using IMAGE
-        %imshow(getsnapshot(handles.video), 'Parent', gcf);
-        set(handles.cameraAxes,'ytick',[],'xtick',[]); % Remove tickmarks and labels that are inserted when using IMAGE
-    else
-        delete(imaqfind); % Clean up - delete any image acquisition objects
-    end
-end
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = mainGUI_OutputFcn(hObject, eventdata, handles)
@@ -132,7 +119,7 @@ function startStopCamera_Callback(hObject, eventdata, handles)
         axes(handles.cameraAxes);
         hImage = image( zeros(vidRes(1), vidRes(2), nBands) );
         preview(handles.video, hImage)
-        
+        %preview(handles.video)
         set(handles.startAcquisition,'Enable','on');
         set(handles.captureImage,'Enable','on');
         
@@ -202,4 +189,136 @@ function pushbutton5_Callback(hObject, eventdata, handles)
     % handles    structure with handles and user data (see GUIDATA)
     %A comparison like this would normally be moved to the model I think
     handles.controller.flipTest();
+end
+
+
+% --- Executes on button press in position_btn.
+function position_btn_Callback(hObject, eventdata, handles)
+    % hObject    handle to position_btn (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+end
+
+% --- Executes on button press in probe_btn.
+function probe_btn_Callback(hObject, eventdata, handles)
+    % hObject    handle to probe_btn (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+end
+
+% --- Executes on button press in return_btn.
+function return_btn_Callback(hObject, eventdata, handles)
+    % hObject    handle to return_btn (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+end
+
+% --- Executes on button press in save_data_btn.
+function save_data_btn_Callback(hObject, eventdata, handles)
+    % hObject    handle to save_data_btn (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+end
+
+function distance_text_field_Callback(hObject, eventdata, handles)
+    % hObject    handle to distance_text_field (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: get(hObject,'String') returns contents of distance_text_field as text
+    %        str2double(get(hObject,'String')) returns contents of distance_text_field as a double
+end
+
+% --- Executes during object creation, after setting all properties.
+function distance_text_field_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to distance_text_field (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+end
+
+function na_position_text_field_Callback(hObject, eventdata, handles)
+    % hObject    handle to na_position_text_field (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: get(hObject,'String') returns contents of na_position_text_field as text
+    %        str2double(get(hObject,'String')) returns contents of na_position_text_field as a double
+end
+
+% --- Executes during object creation, after setting all properties.
+function na_position_text_field_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to na_position_text_field (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+end
+
+function peizo_voltage_text_field_Callback(hObject, eventdata, handles)
+    % hObject    handle to peizo_voltage_text_field (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: get(hObject,'String') returns contents of peizo_voltage_text_field as text
+    %        str2double(get(hObject,'String')) returns contents of peizo_voltage_text_field as a double
+end
+
+% --- Executes during object creation, after setting all properties.
+function peizo_voltage_text_field_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to peizo_voltage_text_field (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+end
+
+% --- Executes on button press in position_checkbox.
+function position_checkbox_Callback(hObject, eventdata, handles)
+    % hObject    handle to position_checkbox (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of position_checkbox
+end
+
+% --- Executes on button press in probe_checkbox.
+function probe_checkbox_Callback(hObject, eventdata, handles)
+    % hObject    handle to probe_checkbox (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of probe_checkbox
+end
+
+% --- Executes on button press in return_checkbox.
+function return_checkbox_Callback(hObject, eventdata, handles)
+    % hObject    handle to return_checkbox (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of return_checkbox
+end
+
+% --- Executes on button press in checkbox4.
+function checkbox4_Callback(hObject, eventdata, handles)
+    % hObject    handle to checkbox4 (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of checkbox4
 end

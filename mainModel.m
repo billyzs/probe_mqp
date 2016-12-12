@@ -1,11 +1,13 @@
-classdef mainModel < handle    
+classdef MainModel < handle    
     properties (SetObservable)
         test
+        cameraActive = false;
+        Expirement
     end
         
     methods
         %Set of Testing methods for MVC design practice
-        function this = mainModel()
+        function this = MainModel()
             this.reset();
         end
                 

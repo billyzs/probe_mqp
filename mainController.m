@@ -1,4 +1,5 @@
-classdef mainController < handle
+
+classdef MainController < handle
     %mainController - The main controller for the GUI
     %   Detailed explanation goes here
     
@@ -9,9 +10,10 @@ classdef mainController < handle
     
     methods
         
-        function this = mainController(model)
+        function this = MainController(model)
+            
             this.model = model;
-            this.view = mainView(this);
+            this.view = MainView(this);
         end
         
         function flipTest(this)

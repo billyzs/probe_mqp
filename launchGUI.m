@@ -1,7 +1,3 @@
-function launchGUI()
-clear;
-myModel = mainModel();
+myModel = MainModel();
 
-imaqhwinfo
-myController = mainController(myModel);
-end
+myController = MainController(myModel);

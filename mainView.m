@@ -1,4 +1,4 @@
-classdef mainView < handle
+classdef MainView < handle
     properties
         gui
         model
@@ -6,13 +6,13 @@ classdef mainView < handle
     end
     
     methods
-        function this = mainView(controller)
+        function this = MainView(controller)
             this.controller = controller;
             this.model = controller.model;
             this.gui = mainGUI('controller',this.controller);
             
             addlistener(this.model,'test','PostSet', ...
-                @(src,evnt)mainView.handlePropEvents(this,src,evnt));
+                @(src,evnt)MainView.handlePropEvents(this,src,evnt));
         end
     end
     
