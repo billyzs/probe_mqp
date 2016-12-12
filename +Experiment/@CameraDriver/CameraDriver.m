@@ -1,10 +1,5 @@
 classdef (Abstract) CameraDriver < imaq.VideoDevice & Experiment.Equipment
-    
-    properties (Abstract, Constant, Access=protected)
-        name;
-        manual;
-        
-    end
+       
     properties (Abstract, Access = protected)
         magnification; 
         pixelDensity; % micrometer per pixel
@@ -17,10 +12,10 @@ classdef (Abstract) CameraDriver < imaq.VideoDevice & Experiment.Equipment
             obj@imaq.VideoDevice(driverName, sequence);
         end
         
-        % Destructor; call imaqreset
+        % Destructor; call imaqreset to be extra safe
         function delete(obj)
             delete@imaq.VideoDevice(obj); % call super class destructor
-            imaqreset; % to be extra safe
+            imaqreset; %
         end
         
         function setMagnification(obj, m)

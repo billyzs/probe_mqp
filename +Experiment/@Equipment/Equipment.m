@@ -6,7 +6,6 @@ classdef (Abstract) Equipment < handle
     
     properties (Abstract, Constant, Access=protected) % I don't think the order of the modifiers matter
         name; % char array
-        manual; % location (URL or Folder on disk)
     end
     
     methods (Access=public)
@@ -17,10 +16,7 @@ classdef (Abstract) Equipment < handle
             % returns the name 
             myName = this.name;
         end
-        function myManual = getManual(this)
-            % returns the manual 
-            myManual = this.manual;
-        end
+        
     end
     
 end

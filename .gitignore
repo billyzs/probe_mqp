@@ -20,7 +20,8 @@ slprj/
 
 # Session info
 octave-workspace
-
+# Datasheet folder
+datasheet
 
 ### Windows ###
 # Windows image file caches
@@ -326,6 +327,7 @@ __pycache__/
 *.pyc
 
 # Cake - Uncomment if you are using it
+
 # tools/
 
 ### VisualStudio Patch ###

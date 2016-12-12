@@ -2,7 +2,6 @@ classdef CameraPike < Experiment.CameraDriver
     
     properties (Constant, Access=protected)
         name = 'AVT_Pike_F100B';
-        manual = '';
     end
     properties (Access = protected)
         magnification = 1; 
