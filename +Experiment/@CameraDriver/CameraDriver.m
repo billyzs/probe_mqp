@@ -1,6 +1,6 @@
 classdef (Abstract) CameraDriver < imaq.VideoDevice & Experiment.Equipment
        
-    properties (Abstract, Access = protected)
+    properties (Access = protected, Abstract)
         magnification; 
         pixelDensity; % micrometer per pixel
     end
@@ -28,7 +28,7 @@ classdef (Abstract) CameraDriver < imaq.VideoDevice & Experiment.Equipment
         
     end
     
-    methods (Static, Access=public)
+    methods (Access=public, Static)
         function m = getMagnification(obj)
             m = obj.magnification;
         end
