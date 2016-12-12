@@ -4,17 +4,15 @@ classdef (Abstract) Equipment < handle
     % would be used
     %   For example, Motor Drivers, Piezos, Interferometers, Cameras
     
-    properties (Abstract, Constant, Access=protected) 
-        % I don't think the order of the modifiers matter
-        name % char array
-        manual % location (URL or Folder on disk)
+    properties (Abstract, Constant, Access=protected) % I don't think the order of the modifiers matter
+        name; % char array
+        manual; % location (URL or Folder on disk)
     end
     
     methods (Access=public)
-        
         % Equipment should have their own constructor and destructors.
         % Not specified here. 
-                
+            
         function myName = getName(this)
             % returns the name 
             myName = this.name;
