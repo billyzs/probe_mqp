@@ -12,7 +12,7 @@ classdef MVPDriver < MotorDriver
         moves = zeros(3,1); % moves is a n*3 Array (Stack) containing the past moves
     end
     
-    methods (Access=private)
+    methods (Access=public)
         function connect(this)
             this.writeCmd('HO');
         end
@@ -29,7 +29,7 @@ classdef MVPDriver < MotorDriver
         end
     end
     
-    methods (Access = protected)
+    methods (Access=public)
    
         function enable(this)
             try

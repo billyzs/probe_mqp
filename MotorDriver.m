@@ -13,7 +13,7 @@ classdef (Abstract) MotorDriver < Equipment
         % sequence of moves
     end
     
-    methods (Access=protected, Abstract)
+    methods (Access=public, Abstract)
         % Constructors and destructors should be defined in subclasses
         
         % Specify the displacement, velocity, acceleration of a move
