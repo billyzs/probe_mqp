@@ -4,7 +4,7 @@ classdef (Abstract) Equipment < handle
     % would be used
     %   For example, Motor Drivers, Piezos, Interferometers, Cameras
     
-    properties (Abstract, Constant, Access=protected) % I don't think the order of the modifiers matter
+    properties (Abstract, Access=protected) % I don't think the order of the modifiers matter
         name; % char array
     end
     
