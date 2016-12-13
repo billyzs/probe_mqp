@@ -1,6 +1,6 @@
 classdef CameraWebcam < CameraDriver
     
-    properties (Constant, Access=protected)
+    properties (Access=protected)
         name = 'Webcam';
     end
     properties (Access = protected)
