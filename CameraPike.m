@@ -12,7 +12,7 @@ classdef CameraPike < CameraDriver
             if nargin ==  0
                 seq = 1;
             end
-            obj@Experiment.CameraDriver('gentl', seq);
+            obj@CameraDriver('gentl', seq);
         end      
     end
 end

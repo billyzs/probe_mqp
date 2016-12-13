@@ -22,7 +22,7 @@ function varargout = mainGUI(varargin)
 
     % Edit the above text to modify the response to help mainGUI
 
-    % Last Modified by GUIDE v2.5 12-Dec-2016 15:26:33
+    % Last Modified by GUIDE v2.5 12-Dec-2016 19:44:00
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -75,9 +75,10 @@ function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % since the connection to the camera will already have
     % been established.
     try 
-        handles.video = videoinput('winvideo');
+        handles.camera = CameraWebcam();
         set(handles.startStopCamera,'Enable','on');
     catch ex
+        'Caught exception on video connect'
         set(handles.startStopCamera,'Enable','off');
     end    
     
@@ -113,19 +114,19 @@ function startStopCamera_Callback(hObject, eventdata, handles)
     if strcmp(get(handles.startStopCamera,'String'),'Start Camera')
         % Camera is off. Change button string and start camera.
         set(handles.startStopCamera,'String','Stop Camera')
-        start(handles.video)
+        start(handles.camera)
         
    
         axes(handles.cameraAxes);
-        preview(handles.video, hImage)
-        %preview(handles.video)
+        preview(handles.camera);
+        %preview(handles.camera)
         set(handles.startAcquisition,'Enable','on');
         set(handles.captureImage,'Enable','on');
         
     else
         % Camera is on. Stop camera and change button string.
         set(handles.startStopCamera,'String','Start Camera')
-        stop(handles.video)
+        stop(handles.camera)
         set(handles.startAcquisition,'Enable','off');
         set(handles.captureImage,'Enable','off');
     end
@@ -136,7 +137,7 @@ function captureImage_Callback(hObject, eventdata, handles)
     % hObject    handle to captureImage (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % frame = getsnapshot(handles.video);
+    % frame = getsnapshot(handles.camera);
     frame = get(get(handles.cameraAxes,'children'),'cdata'); % The current displayed frame
     save('testframe.mat', 'frame');
     disp('Frame saved to file ''testframe.mat''');
@@ -153,18 +154,18 @@ function startAcquisition_Callback(hObject, eventdata, handles)
     if strcmp(get(handles.startAcquisition,'String'),'Start Acquisition')
         % Camera is not acquiring. Change button string and start acquisition.
         set(handles.startAcquisition,'String','Stop Acquisition');
-        trigger(handles.video);
+        trigger(handles.camera);
     else
         % Camera is acquiring. Stop acquisition, save video data,
         % and change button string.
-        stop(handles.video);
+        stop(handles.camera);
         disp('Saving captured video...');
 
-        videodata = getdata(handles.video);
+        videodata = getdata(handles.camera);
         save('testvideo.mat', 'videodata');
         disp('Video saved to file ''testvideo.mat''');
 
-        start(handles.video); % Restart the camera
+        start(handles.camera); % Restart the camera
         set(handles.startAcquisition,'String','Start Acquisition');
     end
 end
@@ -321,3 +322,10 @@ function checkbox4_Callback(hObject, eventdata, handles)
 
     % Hint: get(hObject,'Value') returns toggle state of checkbox4
 end
+
+
+% --------------------------------------------------------------------
+function Untitled_1_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
