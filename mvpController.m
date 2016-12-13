@@ -94,9 +94,6 @@ classdef mvpController < handle
         function enableMotor(this)
             this.writeCmd('EN');
         end
-        
-        function 
-        
     end
 end
         

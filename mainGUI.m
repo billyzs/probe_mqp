@@ -75,7 +75,8 @@ function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % since the connection to the camera will already have
     % been established.
     try 
-        handles.video = videoinput('gentl');
+        handles.video = videoinput('winvideo');
+        set(handles.startStopCamera,'Enable','on');
     catch ex
         set(handles.startStopCamera,'Enable','off');
     end    
@@ -114,10 +115,8 @@ function startStopCamera_Callback(hObject, eventdata, handles)
         set(handles.startStopCamera,'String','Stop Camera')
         start(handles.video)
         
-        vidRes = get(handles.video, 'VideoResolution');
-        nBands = get(handles.video, 'NumberOfBands');
+   
         axes(handles.cameraAxes);
-        hImage = image( zeros(vidRes(1), vidRes(2), nBands) );
         preview(handles.video, hImage)
         %preview(handles.video)
         set(handles.startAcquisition,'Enable','on');
