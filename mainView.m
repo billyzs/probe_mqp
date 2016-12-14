@@ -1,10 +1,24 @@
 classdef MainView < handle
     properties
-        jFrame
         model
         controller
-        video_timer
+        videoTimer
         camera
+        %Java Objects
+        jFrame
+        startCameraButton;
+        captureImageButton;
+    	captureVideoButton;
+    	currentPositionTextArea;
+    	naDistanceTextField;
+    	piezoDistanceTextField;
+    	positionButton;
+    	probeButton;
+    	returnButton;
+    	saveDataButton;
+    	stepActuatorsButton;
+    	targetPositionTextField;
+        motorEnableToggleButton;
     end
     
     methods
@@ -22,22 +36,38 @@ classdef MainView < handle
         function launchView(this)
             
             this.camera = CameraWebcam(1, 'MJPG_640x480');
-            %start(c);
             % Add Java library to dynamic Java classpath
             javaaddpath([pwd '\Probe_MQP_Java_GUI.jar']);
-
             % Get example Java window from the library
             this.jFrame = probe_mqp_java_gui.MainUIJFrame();
-
             % Get Java buttons
             % Note: see http://UndocumentedMatlab.com/blog/matlab-callbacks-for-java-events-in-r2014a
-            startCameraButton = handle(this.jFrame.getStartCameraButton(), 'CallbackProperties');
-            %showWarnButton = handle(jFrame.getShowWarnDlgButton(), 'CallbackProperties');
-
+            this.startCameraButton       = handle(this.jFrame.getStartCameraButton(),       'CallbackProperties');
+            this.captureImageButton      = handle(this.jFrame.getCaptureImageButton(),      'CallbackProperties');
+            this.captureVideoButton      = handle(this.jFrame.getCaptureVideoButton(),      'CallbackProperties');
+            this.currentPositionTextArea = handle(this.jFrame.getCurrentPositionTextArea(), 'CallbackProperties');
+            this.naDistanceTextField     = handle(this.jFrame.getNADistanceTextField(),     'CallbackProperties');
+            this.piezoDistanceTextField  = handle(this.jFrame.getPiezoDistanceTextField(),  'CallbackProperties');
+            this.positionButton          = handle(this.jFrame.getPositionButton(),          'CallbackProperties');
+            this.probeButton             = handle(this.jFrame.getProbeButton(),             'CallbackProperties');
+            this.returnButton            = handle(this.jFrame.getReturnButton(),            'CallbackProperties');
+            this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
+            this.stepActuatorsButton     = handle(this.jFrame.getStepActuatorsButton(),     'CallbackProperties');
+            this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
+            this.motorEnableToggleButton = handle(this.jFrame.getMotorEnableToggleButton(), 'CallbackProperties');
             % Set Java button callbacks
-            set(startCameraButton, 'ActionPerformedCallback', @this.startCameraButtonCallback);
-            
-            
+            set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
+            set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
+            set(this.captureVideoButton,      'ActionPerformedCallback', @this.captureVideoButtonCallback);
+            set(this.naDistanceTextField,     'ActionPerformedCallback', @this.naDistanceTextFieldCallback);
+            set(this.piezoDistanceTextField,  'ActionPerformedCallback', @this.piezoDistanceTextFieldCallback);
+            set(this.positionButton,          'ActionPerformedCallback', @this.positionButtonCallback);
+            set(this.probeButton,             'ActionPerformedCallback', @this.probeButtonCallback);
+            set(this.returnButton,            'ActionPerformedCallback', @this.returnButtonCallback);
+            set(this.saveDataButton,          'ActionPerformedCallback', @this.saveDataButtonCallback);
+            set(this.stepActuatorsButton,     'ActionPerformedCallback', @this.stepActuatorsButtonCallback);
+            set(this.targetPositionTextField, 'ActionPerformedCallback', @this.targetPositionTextFieldCallback);
+            set(this.motorEnableToggleButton, 'ActionPerformedCallback', @this.motorEnableToggleButtonCallback);
             
             
             % Display the Java window
@@ -47,9 +77,39 @@ classdef MainView < handle
                 waitfor(this.jFrame);
             end
         end
-        
+        % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
-            VideoTimer(this.camera, this.jFrame);
+            if (this.controller.cameraIsActive() == false)
+                this.startCameraButton.setText('Stop');
+                this.videoTimer = VideoTimer(this.camera, this.jFrame);
+                this.controller.setCameraActive(true);
+            else
+                this.startCameraButton.setText('Start');
+                this.videoTimer.stop();
+                this.controller.setCameraActive(false);
+            end
+        end
+        function captureImageButtonCallback(this, hObject, hEventData)
+        end
+        function captureVideoButtonCallback(this, hObject, hEventData)
+        end
+        function naDistanceTextFieldCallback(this, hObject, hEventData)
+        end
+        function piezoDistanceTextFieldCallback(this, hObject, hEventData)
+        end
+        function positionButtonCallback(this, hObject, hEventData)
+        end
+        function probeButtonCallback(this, hObject, hEventData)
+        end
+        function returnButtonCallback(this, hObject, hEventData)
+        end
+        function saveDataButtonCallback(this, hObject, hEventData)
+        end
+        function stepActuatorsButtonCallback(this, hObject, hEventData)
+        end
+        function targetPositionTextFieldCallback(this, hObject, hEventData)
+        end
+        function motorEnableToggleButtonCallback(this, hObject, hEventData)
         end
     end
     
