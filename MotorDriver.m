@@ -1,4 +1,5 @@
 classdef (Abstract) MotorDriver < Equipment
+   
     properties (Access=protected, Abstract)
         defaultVelocity;
         defaultAcceleration;
