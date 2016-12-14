@@ -1,10 +1,12 @@
-%mvpDriver = MVPDriver(1, 'COM6');
+mvpDriver = MVPDriver(1, 'COM6');
+aptDriver = APTDriver();
+pause(4);
+aptStrainGuage = APTStrainGuage(84813062);
+aptStrainGuage.identify();
 
-%myModel = MainModel(mvpDriver);
+pause(4);
 
-%myController = MainController(myModel);
+myModel = MainModel(mvpDriver,aptDriver,aptStrainGuage);
 
-
-sg = APTStrainGuage(84813062);
-sg.identify();
-sg.getPosition()
+myController = MainController(myModel);
+myModel.startPollingTimer();

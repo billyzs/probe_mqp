@@ -36,8 +36,11 @@ classdef MainController < handle
             enabled = this.model.motorsEnabled;
         end
         
-        function moveManual(this, distance)
+        function moveManualNA(this, distance)
             this.model.moveManualNA(distance);
+        end
+        function moveManualPiezo(this, distance)
+            this.model.moveManualPiezo(distance);
         end
         
     end

@@ -16,7 +16,8 @@ classdef MainView < handle
     	probeButton;
     	returnButton;
     	saveDataButton;
-    	stepActuatorsButton;
+    	stepNAButton;
+        stepPiezoButton;
     	targetPositionTextField;
         motorsEnableButton;
     end
@@ -27,15 +28,15 @@ classdef MainView < handle
             this.model = controller.model;
            % this.gui = mainGUI('controller',this.controller);
             
-            addlistener(this.model,'test','PostSet', ...
-                @(src,evnt)MainView.handlePropEvents(this,src,evnt));
+            addlistener(this.model,'piezoPosition','PostSet', ...
+                @this.handlePropEvents);
         
             this.launchView();
         end
         
         function launchView(this)
-            this.camera = CameraPike(1);
-            %this.camera = CameraWebcam(1, 'MJPG_640x480');
+            %this.camera = CameraPike(1);
+            this.camera = CameraWebcam(1, 'MJPG_640x480');
             % Add Java library to dynamic Java classpath
             javaaddpath([pwd '\Probe_MQP_Java_GUI.jar']);
             % Get example Java window from the library
@@ -52,7 +53,8 @@ classdef MainView < handle
             this.probeButton             = handle(this.jFrame.getProbeButton(),             'CallbackProperties');
             this.returnButton            = handle(this.jFrame.getReturnButton(),            'CallbackProperties');
             this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
-            this.stepActuatorsButton     = handle(this.jFrame.getStepActuatorsButton(),     'CallbackProperties');
+            this.stepNAButton            = handle(this.jFrame.getStepNAButton(),     'CallbackProperties');
+            this.stepPiezoButton         = handle(this.jFrame.getStepPiezoButton(),         'CallbackProperties');
             this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
             this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties');
             % Set Java object callbacks
@@ -65,7 +67,8 @@ classdef MainView < handle
             set(this.probeButton,             'ActionPerformedCallback', @this.probeButtonCallback);
             set(this.returnButton,            'ActionPerformedCallback', @this.returnButtonCallback);
             set(this.saveDataButton,          'ActionPerformedCallback', @this.saveDataButtonCallback);
-            set(this.stepActuatorsButton,     'ActionPerformedCallback', @this.stepActuatorsButtonCallback);
+            set(this.stepNAButton,            'ActionPerformedCallback', @this.stepNAButtonCallback);
+            set(this.stepPiezoButton,         'ActionPerformedCallback', @this.stepPiezoButtonCallback);
             set(this.targetPositionTextField, 'ActionPerformedCallback', @this.targetPositionTextFieldCallback);
             set(this.motorsEnableButton,      'ActionPerformedCallback', @this.motorsEnableButtonCallback);
             
@@ -105,41 +108,44 @@ classdef MainView < handle
         end
         function saveDataButtonCallback(this, hObject, hEventData)
         end
-        function stepActuatorsButtonCallback(this, hObject, hEventData)
+        function stepNAButtonCallback(this, hObject, hEventData)
             if (this.controller.getMotorsEnabled())
                 distanceStr = this.naDistanceTextField.getText();
                 distance = str2num(distanceStr)
-                this.controller.moveManual(distance);
+                this.controller.moveManualNA(distance);
+            end
+        end
+        function stepPiezoButtonCallback(this, hObject, hEventData)
+            if (this.controller.getMotorsEnabled())
+                distanceStr = this.piezoDistanceTextField.getText();
+                distance = str2num(distanceStr)
+                this.controller.moveManualPiezo(distance);
             end
         end
         function targetPositionTextFieldCallback(this, hObject, hEventData)
         end
         function motorsEnableButtonCallback(this, hObject, hEventData)
             if (this.controller.getMotorsEnabled())
-                'disable'
                 this.controller.disableMotors();
                 this.motorsEnableButton.setText('Motors Disabled');
             else
-                'enable'
                 this.controller.enableMotors();
                 this.motorsEnableButton.setText('Motors Enabled');
             end
         end
     end
     
-    methods (Static)
+    methods
         function handlePropEvents(this,src,evnt)
-            evntobj = evnt.AffectedObject;
-            handles = guidata(this.gui);
-            switch src.Name
-                case 'test'
-                    handles.test = evntobj.test;
-                    set(handles.text_test, 'String', evntobj.test);
-                    % Not sure if resetting gui data is the most efficient
-                    % way to make push the changes but it seems to be
-                    % required
-                    guidata(gcbo,handles) 
-            end
+            this
+            %evntobj = evnt.AffectedObject;
+            %switch src.Name
+            %    case 'piezoPosition'
+                    NAPos = this.model.NAPosition;
+                    piezoPos = this.model.piezoPosition;
+                    str = strcat(strcat('NA = ', num2str(NAPos)), strcat(' PI = ', num2str(piezoPos)))
+                    this.currentPositionTextArea.setText(str);
+            %end
         end
     end
 end
