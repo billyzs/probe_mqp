@@ -27,24 +27,24 @@ classdef (Abstract) MotorDriver < Equipment
         
         function valid = isMoveValid(this, displacement, velocity, acceleration)
             valid = 0;
-            if (this.displacement + displacement < this.maxDisplacement ...
-                    && velocity < this.maxVelocity... 
-                    && acceleration < this.maxAcceleration)
+            if ( ...
+                     (velocity < this.maxVelocity)... 
+                    )
                 % do something
                 valid = 1;
             else
-                errMsg = this.name + '::isMoveValid::';
+                errMsg = [this.name,  '::isMoveValid::'];
                 if (this.displacement + displacement > this.maxDisplacement)
-                    errMsg = errMsg + 'displacement exceeds maxDisplacement: would be ' ...
-                        + num2str(this.displacement + displacement) + ';'; 
+                    errMsg = [errMsg  'displacement exceeds maxDisplacement: would be ', ...
+                        + num2str(this.displacement + displacement)] + ';'; 
                 end
-                if (velocity < this.maxVelocity)
-                     errMsg = errMsg + 'vel exceeds maxVelocity: ' + ...
-                         num2str(velocity) + ' vs ' + num2str(this.maxVelocity) + ';';
+                if (velocity > this.maxVelocity)
+                     errMsg = [errMsg, 'vel exceeds maxVelocity: ', ...
+                         num2str(velocity), ' vs ',  num2str(this.maxVelocity)  ';'];
                 end
                 if (acceleration > this.maxAcceleration)
-                     errMsg = errMsg + 'acc exceeds maxAcceleration: ' + ...
-                         num2str(acceleration) + ' vs ' + num2str(this.maxAcceleration) + ';';
+                     errMsg = [errMsg  'acc exceeds maxAcceleration: ' ...
+                         num2str(acceleration) ' vs ' num2str(this.maxAcceleration) ';'];
                 end
                 error(errMsg);
             end

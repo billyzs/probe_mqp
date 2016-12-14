@@ -3,16 +3,16 @@ classdef MVPDriver < MotorDriver
         name = 'MVP';
         comPort; % COM1, COM2, ...
         address; % Sequence 1, 2 , 3 ... 
-        defaultVelocity = 1000;
-        defaultAcceleration = 1000;
-        maxDisplacement = 4000;
+        defaultVelocity = 100;
+        defaultAcceleration = 100;
+        maxDisplacement = 40000;
         maxVelocity = 4000;
         maxAcceleration = 4000;
         displacement;
-        moves = zeros(3,1); % moves is a n*3 Array (Stack) containing the past moves
+        moves = zeros(1,3); % moves is a n*3 Array (Stack) containing the past moves
     end
     
-    methods (Access=public)
+    methods (Access=private)
         function connect(this)
             this.writeCmd('HO');
         end
@@ -33,12 +33,12 @@ classdef MVPDriver < MotorDriver
    
         function enable(this)
             try
-                fopen(this.comport);
+                fopen(this.comPort);
                 this.connect();
                 this.enableMotor();
-                obj.writeCmd('ANO', 2350); % ANO sets the current. has to be set to 2350 per NA rep Jim Steward
+                this.writeCmd('ANO', 2350); % ANO sets the current. has to be set to 2350 per NA rep Jim Steward
             catch exception
-                fclose(obj.comPort);
+                fclose(this.comPort);
                 clear obj;
                 rethrow(exception);
             end
@@ -77,7 +77,7 @@ classdef MVPDriver < MotorDriver
                 % status = fscanf(this.comPort);
                 success = 1;
             catch exception
-                rethorw(exception);
+                rethrow(exception);
             end
         end
         
@@ -89,11 +89,11 @@ classdef MVPDriver < MotorDriver
             obj.address = addr; 
             if nargin > 1
                 try
-                obj.comPort = serial(port,'BaudRate', 9600, 'DataBits',8,  'StopBits', 1,... 
-                    'Parity', 'none','FlowControl', 'none', ...
-                    'ReadAsyncMode', 'continuous', ...
-                    'Terminator', 'CR', ...
-                    'ByteOrder', 'littleEndian');    
+                    obj.comPort = serial(port,'BaudRate', 9600, 'DataBits',8,  'StopBits', 1,... 
+                        'Parity', 'none','FlowControl', 'none', ...
+                        'ReadAsyncMode', 'continuous', ...
+                        'Terminator', 'CR', ...
+                        'ByteOrder', 'littleEndian');    
                 catch ME
                     fclose(obj.comPort);
                     clear obj;
@@ -102,16 +102,18 @@ classdef MVPDriver < MotorDriver
             end
         end
         
-        function delete(obj)
-            if (strcmp(this.comPort.Status,'open'))
-                fclose(obj.comPort);
+        function delete(this)
+            if (~isempty(this.comPort) && strcmp(this.comPort.Status,'open'))
+                fclose(this.comPort);
             end
         end
         
-        function success = isConnnected(this)
-            success = 0;
+        function success = isConnected(this)
+            success = false;
             try
-                success = strcmp(this.comPort.Status,'open');
+                if( ~isempty(this.comPort) && strcmp(this.comPort.Status,'open'))
+                    success = true;
+                end
             catch exception
                 rethrow(exception);
             end
@@ -123,8 +125,8 @@ classdef MVPDriver < MotorDriver
             end
             cmd = this.parseCommand(cmd, val);
             try
-                assert(strcmp(this.comPort.Status,'open'));
                 disp(cmd);
+                assert(this.isConnected());
                 fprintf(this.comPort, cmd);
                 %pause(0.1);
             catch ME
@@ -134,6 +136,9 @@ classdef MVPDriver < MotorDriver
                 % ME = addCause(ME, cause);
                 rethrow(ME);
             end
+        end
+        function cp = getComPort(this)
+            cp = this.comPort;
         end
     end
 
