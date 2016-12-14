@@ -14,25 +14,26 @@ f = figure('Position', fpos,...
 %%APTPZMOTOR.APTPZMototCtrl.1
 %% or
 %%MGPIEZO.MGPiezoCtrl.1 I think this one works better
-hPiezo = actxcontrol('MGPIEZO.MGPiezoCtrl.1',[20 420 600 400 ], f);
+%hPiezo = actxcontrol('MGPIEZO.MGPiezoCtrl.1',[20 420 600 400 ], f);
 hStrain = actxcontrol('MGPIEZO.MGPiezoCtrl.1',[20 20 600 400 ], f);
 
 %% Initialize
 % Start Control
-hPiezo.StartCtrl;
+%hPiezo.StartCtrl;
+
 hStrain.StartCtrl;
 % Set the Serial Number
-SNPiezo = 81813026; % put in the serial number of the hardware
-set(hPiezo,'HWSerialNum', SNPiezo);
+%SNPiezo = 81813026; % put in the serial number of the hardware
+%set(hPiezo,'HWSerialNum', SNPiezo);
 
-SNStrain = 84813062; % put in the serial number of the hardware
-set(hStrain,'HWSerialNum', SNStrain);
+%SNStrain = 84813062; % put in the serial number of the hardware
+%set(hStrain,'HWSerialNum', SNStrain);
 
-hPiezo.methods('-full');
-
+%hPiezo.methods('-full');
+pause(6);
 % Indentify the device
-hPiezo.Identify;
-hStrain.Identify;
+%hPiezo.Identify;
+%hStrain.Identify;
 pause(5); % waiting for the GUI to load up;
 %'setting position'
 %hPiezo.SetPosOutput(1,5);

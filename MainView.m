@@ -55,7 +55,7 @@ classdef MainView < handle
             this.stepActuatorsButton     = handle(this.jFrame.getStepActuatorsButton(),     'CallbackProperties');
             this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
             this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties');
-            % Set Java button callbacks
+            % Set Java object callbacks
             set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
             set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
             set(this.captureVideoButton,      'ActionPerformedCallback', @this.captureVideoButtonCallback);
