@@ -34,8 +34,8 @@ classdef MainView < handle
         end
         
         function launchView(this)
-            
-            this.camera = CameraWebcam(1, 'MJPG_640x480');
+            this.camera = CameraPike(1);
+            %this.camera = CameraWebcam(1, 'MJPG_640x480');
             % Add Java library to dynamic Java classpath
             javaaddpath([pwd '\Probe_MQP_Java_GUI.jar']);
             % Get example Java window from the library
