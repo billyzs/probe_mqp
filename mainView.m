@@ -18,7 +18,7 @@ classdef MainView < handle
     	saveDataButton;
     	stepActuatorsButton;
     	targetPositionTextField;
-        motorEnableToggleButton;
+        motorsEnableButton;
     end
     
     methods
@@ -54,7 +54,7 @@ classdef MainView < handle
             this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
             this.stepActuatorsButton     = handle(this.jFrame.getStepActuatorsButton(),     'CallbackProperties');
             this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
-            this.motorEnableToggleButton = handle(this.jFrame.getMotorEnableToggleButton(), 'CallbackProperties');
+            this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties');
             % Set Java button callbacks
             set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
             set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
@@ -67,7 +67,7 @@ classdef MainView < handle
             set(this.saveDataButton,          'ActionPerformedCallback', @this.saveDataButtonCallback);
             set(this.stepActuatorsButton,     'ActionPerformedCallback', @this.stepActuatorsButtonCallback);
             set(this.targetPositionTextField, 'ActionPerformedCallback', @this.targetPositionTextFieldCallback);
-            set(this.motorEnableToggleButton, 'ActionPerformedCallback', @this.motorEnableToggleButtonCallback);
+            set(this.motorsEnableButton,      'ActionPerformedCallback', @this.motorsEnableButtonCallback);
             
             
             % Display the Java window
@@ -85,7 +85,7 @@ classdef MainView < handle
                 this.controller.setCameraActive(true);
             else
                 this.startCameraButton.setText('Start');
-                this.videoTimer.stop();
+                this.videoTimer.stopVideo();
                 this.controller.setCameraActive(false);
             end
         end
@@ -106,10 +106,24 @@ classdef MainView < handle
         function saveDataButtonCallback(this, hObject, hEventData)
         end
         function stepActuatorsButtonCallback(this, hObject, hEventData)
+            if (this.controller.getMotorsEnabled())
+                distanceStr = this.naDistanceTextField.getText();
+                distance = str2num(distanceStr)
+                this.controller.moveManual(distance);
+            end
         end
         function targetPositionTextFieldCallback(this, hObject, hEventData)
         end
-        function motorEnableToggleButtonCallback(this, hObject, hEventData)
+        function motorsEnableButtonCallback(this, hObject, hEventData)
+            if (this.controller.getMotorsEnabled())
+                'disable'
+                this.controller.disableMotors();
+                this.motorsEnableButton.setText('Motors Disabled');
+            else
+                'enable'
+                this.controller.enableMotors();
+                this.motorsEnableButton.setText('Motors Enabled');
+            end
         end
     end
     

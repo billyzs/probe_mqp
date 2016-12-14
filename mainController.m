@@ -24,9 +24,22 @@ classdef MainController < handle
             active = this.model.cameraActive;
         end
         
-        function flipTest(this)
-            this.model.flipTest();
+        function enableMotors(this)
+            this.model.enableMotors();
         end
+        
+        function disableMotors(this)
+            this.model.disableMotors();
+        end
+        
+        function enabled = getMotorsEnabled(this)
+            enabled = this.model.motorsEnabled;
+        end
+        
+        function moveManual(this, distance)
+            this.model.moveManualNA(distance);
+        end
+        
     end
     
 end
