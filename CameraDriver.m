@@ -9,7 +9,10 @@ classdef (Abstract) CameraDriver < imaq.VideoDevice & Equipment
         % driverName is the adapter name given by >> imaqhwinfo, 
         % usually 'gentl'. Sequence is usually 1
         function obj = CameraDriver(driverName, sequence, format)
-            obj@imaq.VideoDevice(driverName, sequence, format);
+            obj@imaq.VideoDevice(driverName, sequence);
+            if nargin > 2
+                obj.set('VideoFormat', format);
+            end
         end
         
         % Destructor; call imaqreset to be extra safe

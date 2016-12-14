@@ -1,6 +1,6 @@
 classdef CameraPike < CameraDriver
     
-    properties (Constant, Access=protected)
+    properties (Access=protected)
         name = 'AVT_Pike_F100B';
     end
     properties (Access = protected)
