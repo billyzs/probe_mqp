@@ -24,6 +24,23 @@ classdef MainController < handle
             active = this.model.cameraActive;
         end
         
+        function camera = getCamera(this)
+            camera = this.model.getCamera();
+        end
+        
+        function initializeCamera(this, cameraType)
+            switch cameraType
+                case 'webcam'
+                    this.model.setCamera(CameraWebcam(1, 'MJPG_640x480'));
+                case 'gentl'
+                    this.model.setCamera(CameraPike(1));
+            end
+        end
+        
+        function captureImage(this, path)
+            this.model.captureImage(path);
+        end
+        
         function enableMotors(this)
             this.model.enableMotors();
         end

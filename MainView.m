@@ -3,7 +3,6 @@ classdef MainView < handle
         model
         controller
         videoTimer
-        camera
         %Java Objects
         jFrame
         startCameraButton;
@@ -35,8 +34,6 @@ classdef MainView < handle
         end
         
         function launchView(this)
-            %this.camera = CameraPike(1);
-            this.camera = CameraWebcam(1, 'MJPG_640x480');
             % Add Java library to dynamic Java classpath
             javaaddpath([pwd '\Probe_MQP_Java_GUI.jar']);
             % Get example Java window from the library
@@ -82,9 +79,12 @@ classdef MainView < handle
         end
         % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
+            if (isempty(this.controller.getCamera()))
+                this.controller.initializeCamera('webcam');
+            end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
-                this.videoTimer = VideoTimer(this.camera, this.jFrame);
+                this.videoTimer = VideoTimer(this.controller.getCamera(), this.jFrame);
                 this.controller.setCameraActive(true);
             else
                 this.startCameraButton.setText('Start');
@@ -93,6 +93,11 @@ classdef MainView < handle
             end
         end
         function captureImageButtonCallback(this, hObject, hEventData)
+            if(this.controller.cameraIsActive())
+                [FileName,PathName] = uiputfile();
+                this.controller.captureImage(strcat(PathName, FileName));
+                %this.controller.captureImage();
+            end
         end
         function captureVideoButtonCallback(this, hObject, hEventData)
         end
@@ -137,7 +142,6 @@ classdef MainView < handle
     
     methods
         function handlePropEvents(this,src,evnt)
-            this
             %evntobj = evnt.AffectedObject;
             %switch src.Name
             %    case 'piezoPosition'

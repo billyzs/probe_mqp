@@ -11,7 +11,8 @@ classdef MainModel < handle
         mvpDriver;
         aptDriver;
         aptStrainGuage;
-        
+        camera;
+        videoTimer;
         
     end
         
@@ -58,6 +59,21 @@ classdef MainModel < handle
             piezoPosition = this.aptStrainGuage.getPosition();
             if (this.piezoPosition ~= piezoPosition)
                 this.piezoPosition = piezoPosition;
+            end
+        end
+        
+        function camera = getCamera(this)
+            camera = this.camera;
+        end
+        
+        function setCamera(this, camera)
+            this.camera = camera;
+        end
+        
+        function captureImage(this, path)
+            if (this.cameraActive == true && ~isempty(this.camera))
+                im = step(this.camera);
+                imwrite(im, path);
             end
         end
     end
