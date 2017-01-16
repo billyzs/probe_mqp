@@ -50,7 +50,7 @@ classdef MainView < handle
             this.probeButton             = handle(this.jFrame.getProbeButton(),             'CallbackProperties');
             this.returnButton            = handle(this.jFrame.getReturnButton(),            'CallbackProperties');
             this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
-            this.stepNAButton            = handle(this.jFrame.getStepNAButton(),     'CallbackProperties');
+            this.stepNAButton            = handle(this.jFrame.getStepNAButton(),            'CallbackProperties');
             this.stepPiezoButton         = handle(this.jFrame.getStepPiezoButton(),         'CallbackProperties');
             this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
             this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties');
@@ -80,7 +80,7 @@ classdef MainView < handle
         % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
             if (isempty(this.controller.getCamera()))
-                this.controller.initializeCamera('webcam');
+                this.controller.initializeCamera('gentl');
             end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
@@ -116,14 +116,14 @@ classdef MainView < handle
         function stepNAButtonCallback(this, hObject, hEventData)
             if (this.controller.getMotorsEnabled())
                 distanceStr = this.naDistanceTextField.getText();
-                distance = str2num(distanceStr)
+                distance = str2num(distanceStr);
                 this.controller.moveManualNA(distance);
             end
         end
         function stepPiezoButtonCallback(this, hObject, hEventData)
             if (this.controller.getMotorsEnabled())
                 distanceStr = this.piezoDistanceTextField.getText();
-                distance = str2num(distanceStr)
+                distance = str2num(distanceStr);
                 this.controller.moveManualPiezo(distance);
             end
         end
@@ -147,7 +147,7 @@ classdef MainView < handle
             %    case 'piezoPosition'
                     NAPos = this.model.NAPosition;
                     piezoPos = this.model.piezoPosition;
-                    str = strcat(strcat('NA = ', num2str(NAPos)), strcat(' PI = ', num2str(piezoPos)))
+                    str = strcat(strcat('NA = ', num2str(NAPos)), strcat(' PI = ', num2str(piezoPos)));
                     this.currentPositionTextArea.setText(str);
             %end
         end
