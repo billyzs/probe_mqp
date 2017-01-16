@@ -12,6 +12,8 @@ classdef (Abstract) CameraDriver < imaq.VideoDevice & Equipment
             obj@imaq.VideoDevice(driverName, sequence);
             if nargin > 2
                 obj.set('VideoFormat', format);
+                %triggerconfig(obj,'manual');
+                %obj.FramesPerTrigger = Inf; % Capture frames until we manually stop it
             end
         end
         

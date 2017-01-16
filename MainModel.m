@@ -46,7 +46,7 @@ classdef MainModel < handle
         function moveManualNA(this, distance)
             if (isnumeric(distance) && ~isempty(distance))
                 this.mvpDriver.defaultMove(distance);
-                this.NAPosition = NAPosition + distance;
+                this.NAPosition = this.NAPosition + distance;
             end
         end
         function moveManualPiezo(this, distance)

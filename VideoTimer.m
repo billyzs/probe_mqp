@@ -12,6 +12,7 @@ classdef VideoTimer < handle
             this.jFrame = jFrame;
             this.timer = timer('Period', .03, 'TasksToExecute', Inf, ...
             'ExecutionMode', 'fixedRate', 'TimerFcn', @this.frameCallback);
+            %start(this.cameraDriver);
             start(this.timer);
         end
         function frameCallback(this,src,evt)
@@ -21,7 +22,8 @@ classdef VideoTimer < handle
             this.jFrame.setVideoImage(imJava);
         end
         function stopVideo(this)
-            stop(this.timer);
+            %stop(this.timer);
+            stop(this.cameraDriver);
         end
     end
     
