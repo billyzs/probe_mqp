@@ -9,7 +9,7 @@ boolean stringComplete = false;  // whether the string is complete
 void setup() {
   // put your setup code here, to run once:
   myServo.attach(6);
-  myServo.write(90);
+  myServo.write(65);
     // initialize serial:
   Serial.begin(9600);
   // reserve 200 bytes for the inputString:
@@ -22,11 +22,11 @@ void loop() {
     inputString.trim();
     if (inputString.equals("Block"))
     {
-      myServo.write(180);
+      myServo.write(0);
     }
     else if (inputString.equals("UnBlock"))
     {
-      myServo.write(0);
+      myServo.write(65);
     }
     // clear the string:
     inputString = "";
