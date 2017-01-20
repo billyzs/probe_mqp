@@ -84,13 +84,19 @@ classdef MainView < handle
             end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
-                this.videoTimer = VideoTimer(this.controller.getCamera(), this.jFrame);
+                this.controller.getCamera().start();
                 this.controller.setCameraActive(true);
             else
                 this.startCameraButton.setText('Start');
-                this.videoTimer.stopVideo();
+                this.controller.getCamera().stop();
                 this.controller.setCameraActive(false);
             end
+        end
+        function previewFrameCallback(this, obj, event)
+            flushdata(obj);
+            im = getdata(obj);
+            imJava = im2java(im);
+            this.jFrame.setVideoImage(imJava);
         end
         function captureImageButtonCallback(this, hObject, hEventData)
             if(this.controller.cameraIsActive())
@@ -138,7 +144,15 @@ classdef MainView < handle
                 this.motorsEnableButton.setText('Motors Enabled');
             end
         end
+        
+        %destructor
+         function delete(this)
+            if (this.controller.cameraIsActive())
+                this.controller.getCamera.stop();
+            end
+        end
     end
+    
     
     methods
         function handlePropEvents(this,src,evnt)

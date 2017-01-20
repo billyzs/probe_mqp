@@ -1,25 +1,26 @@
-classdef (Abstract) CameraDriver < imaq.VideoDevice & Equipment
+classdef (Abstract) CameraDriver < Equipment
        
     properties (Access = protected, Abstract)
         magnification; 
         pixelDensity; % micrometer per pixel
+    end
+    properties (Access = protected)
+        videoObj;
     end
     % CameraDriver should have all the properties of VideoInput
     methods (Access = public)
         % driverName is the adapter name given by >> imaqhwinfo, 
         % usually 'gentl'. Sequence is usually 1
         function obj = CameraDriver(driverName, sequence, format)
-            obj@imaq.VideoDevice(driverName, sequence);
+            obj.videoObj = videoinput(driverName, sequence);
             if nargin > 2
                 obj.set('VideoFormat', format);
-                %triggerconfig(obj,'manual');
-                %obj.FramesPerTrigger = Inf; % Capture frames until we manually stop it
             end
         end
         
         % Destructor; call imaqreset to be extra safe
         function delete(obj)
-            delete@imaq.VideoDevice(obj); % call super class destructor
+            delete@imaq.videoinput(obj); % call super class destructor
             imaqreset; %
         end
         
@@ -29,6 +30,22 @@ classdef (Abstract) CameraDriver < imaq.VideoDevice & Equipment
         
         function setPixelDensity(obj, pd)
             obj.pixelDensity = pd;
+        end
+        
+        function start(obj)
+            start(obj.videoObj);
+        end
+        
+        function stop(obj)
+            stop(obj.videoObj);
+        end
+        
+        function data = getImageData(obj)
+            data = getdata(obj.videoObj);
+        end
+        
+        function setVideoParameter(obj, key, value)
+            set(obj.videoObj, key, value);
         end
         
     end

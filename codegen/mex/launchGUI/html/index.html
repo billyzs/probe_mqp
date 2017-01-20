@@ -1,0 +1,722 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0014)about:internet -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Code Generation Report</title>
+<link rel="stylesheet" type="text/css" href="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\eml_report.css" />
+<link rel="stylesheet" type="text/css" href="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\jQuery\\ui.resizable.css" />
+<link rel="stylesheet" type="text/css" href="file:///C:\\probe-mqp\\probe_mqp\\codegen\\mex\\launchGUI\\html\\index.css" />
+
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\jQuery\\jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\jQuery\\jquery-ui-1.7.custom.min.js"></script>
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\jQuery\\jquery.tablesorter.mod.js"></script>
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\jQuery\\jquery.hotkeys-0.7.8.js"></script>
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\eml_report_interactions.js"></script>
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\coder\\coder\\resources\\eml_report_layout.js"></script>
+<script type="text/javascript" src="file:///C:\\Program Files\\Matlab\\R2015b\\toolbox\\rtw\\rtw\\+coder\\+report\\resources\\rtwshrink.js"></script>
+<script type="text/javascript">
+var localizedMessages = {
+    callSelectPrompt: "Select a function call:",
+    callSelectSource: "Calls from this function",
+    callSelectTarget: "Calls to this function",
+    infoForExpression: "Information for the selected expression:",
+    infoForVarType: "Information for the selected variable:",
+    infoForVarConst: "Information for the selected compile-time constant:",
+    infoForVarNone: "This variable does not have information associated with it.",
+    infoForFilter: "Matched {0}/{1} functions, {2}/{3} methods",
+    autoExtrinsicCall: "Only supported within the MATLAB environment."
+};
+var keyBindings = {
+        selectMCodeTab: "Ctrl+m",
+    selectCallStackTab: "Ctrl+k",
+        selectCCodeTab: "Ctrl+c",
+       selectReportTab: "Ctrl+r",
+     selectCenterPanel: "Ctrl+w",
+      selectSummaryTab: "Ctrl+s",
+     selectMessagesTab: "Ctrl+a",
+    selectWatchListTab: "Ctrl+v",
+     selectBuildLogTab: "Ctrl+t"
+};
+var functionInfoTable = {
+ MATLABcode1: "launchGUI1_mcode.html",
+ fpath1: "C:/probe-mqp/probe_mqp/launchGUI.m",
+ lines1: [1, 1, 19],
+ watch1: "launchGUI1_watch.html",
+ title1: "Function: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\launchGUI.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\launchGUI.m')\">launchGUI</a></span>",
+ tcall1: [  ],
+ scall1: [ [ "From line 3 to MVPDriver", "2#srcline87" ], [ "From line 4 to APTDriver", "6#srcline53" ], , [ "From line 6 to APTStrainGuage", "12#srcline18" ],  ],
+ MATLABcode2: "MVPDriver2_mcode.html",
+ fpath2: "C:/probe-mqp/probe_mqp/MVPDriver.m",
+ lines2: [87, 87, 105],
+ watch2: "MVPDriver2_watch.html",
+ title2: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\MVPDriver.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\MVPDriver.m')\">MVPDriver</a></span>",
+ tcall2: [ [ "From launchGUI line 3", "1#F2N10:B12" ] ],
+ scall2: [ [ "From line 87 to MotorDriver", "3#srcline0" ] ],
+ MATLABcode3: "MotorDriver3_mcode.html",
+ fpath3: "C:/probe-mqp/probe_mqp/MotorDriver.m",
+ lines3: [0, 0, 0],
+ watch3: "MotorDriver3_watch.html",
+ title3: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\MotorDriver.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\MotorDriver.m')\">MotorDriver</a></span>",
+ tcall3: [ [ "From MVPDriver line 87", "2#srcline87" ] ],
+ scall3: [  ],
+ MATLABcode4: "Equipment4_mcode.html",
+ fpath4: "C:/probe-mqp/probe_mqp/Equipment.m",
+ lines4: [0, 0, 0],
+ watch4: "Equipment4_watch.html",
+ title4: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\Equipment.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\Equipment.m')\">Equipment</a></span>",
+ tcall4: [  ],
+ scall4: [  ],
+ MATLABcode6: "APTDriver6_mcode.html",
+ fpath6: "C:/probe-mqp/probe_mqp/APTDriver.m",
+ lines6: [53, 53, 56],
+ watch6: "APTDriver6_watch.html",
+ title6: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\APTDriver.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\APTDriver.m')\">APTDriver</a></span>",
+ tcall6: [ [ "From launchGUI line 4", "1#F6N2:B19" ] ],
+ scall6: [ [ "From line 53 to MotorDriver", "7#srcline0" ], [ "From line 54 to initialize", "10#srcline30" ] ],
+ MATLABcode7: "MotorDriver7_mcode.html",
+ fpath7: "C:/probe-mqp/probe_mqp/MotorDriver.m",
+ lines7: [0, 0, 0],
+ watch7: "MotorDriver7_watch.html",
+ title7: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\MotorDriver.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\MotorDriver.m')\">MotorDriver</a></span>",
+ tcall7: [ [ "From APTDriver line 53", "6#srcline53" ] ],
+ scall7: [  ],
+ MATLABcode8: "Equipment8_mcode.html",
+ fpath8: "C:/probe-mqp/probe_mqp/Equipment.m",
+ lines8: [0, 0, 0],
+ watch8: "Equipment8_watch.html",
+ title8: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\Equipment.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\Equipment.m')\">Equipment</a></span>",
+ tcall8: [  ],
+ scall8: [  ],
+ MATLABcode10: "initialize10_mcode.html",
+ fpath10: "C:/probe-mqp/probe_mqp/APTDriver.m",
+ lines10: [30, 30, 37],
+ watch10: "initialize10_watch.html",
+ title10: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\APTDriver.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\APTDriver.m')\">initialize</a></span>",
+ tcall10: [ [ "From APTDriver line 54", "6#F10N3:B170" ] ],
+ scall10: [  ],
+ MATLABcode12: "APTStrainGuage12_mcode.html",
+ fpath12: "C:/probe-mqp/probe_mqp/APTStrainGuage.m",
+ lines12: [18, 18, 24],
+ watch12: "APTStrainGuage12_watch.html",
+ title12: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\APTStrainGuage.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\APTStrainGuage.m')\">APTStrainGuage</a></span>",
+ tcall12: [ [ "From launchGUI line 6", "1#F12N4:B28" ] ],
+ scall12: [ [ "From line 19 to createFigure", "14#srcline76" ], [ "From line 20 to setSerialNumber", "15#srcline30" ], [ "From line 21 to resetControl", "16#srcline34" ] ],
+ MATLABcode14: "createFigure14_mcode.html",
+ fpath14: "C:/probe-mqp/probe_mqp/APTStrainGuage.m",
+ lines14: [76, 76, 83],
+ watch14: "createFigure14_watch.html",
+ title14: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\APTStrainGuage.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\APTStrainGuage.m')\">createFigure</a></span>",
+ tcall14: [ [ "From APTStrainGuage line 19", "12#F14N5:B57" ] ],
+ scall14: [  ],
+ MATLABcode15: "setSerialNumber15_mcode.html",
+ fpath15: "C:/probe-mqp/probe_mqp/APTStrainGuage.m",
+ lines15: [29, 30, 34],
+ watch15: "setSerialNumber15_watch.html",
+ title15: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\APTStrainGuage.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\APTStrainGuage.m')\">setSerialNumber</a></span>",
+ tcall15: [ [ "From APTStrainGuage line 20", "12#F15N6:B62" ] ],
+ scall15: [  ],
+ MATLABcode16: "resetControl16_mcode.html",
+ fpath16: "C:/probe-mqp/probe_mqp/APTStrainGuage.m",
+ lines16: [33, 34, 41],
+ watch16: "resetControl16_watch.html",
+ title16: "Method: <span class='functionname'><a title='C:&nbsp;\\probe-mqp\\probe_mqp\\APTStrainGuage.m' class='functionlink' href=\"matlab: open('C:\\probe-mqp\\probe_mqp\\APTStrainGuage.m')\">resetControl</a></span>",
+ tcall16: [ [ "From APTStrainGuage line 21", "12#F16N7:B68" ] ],
+ scall16: [  ],
+ rootFcnID: "1",
+ firstPage: "1",
+ htmlRoot: "C:/probe-mqp/probe_mqp/codegen/mex/launchGUI/html/"
+};
+var scriptInfoTable = {
+ fpath1: "C:/probe-mqp/probe_mqp/launchGUI.m",
+ fpath2: "C:/probe-mqp/probe_mqp/MVPDriver.m",
+ fpath3: "C:/probe-mqp/probe_mqp/MotorDriver.m",
+ fpath4: "C:/probe-mqp/probe_mqp/Equipment.m",
+ fpath5: "C:/Program Files/Matlab/R2015b/toolbox/coder/coder/+coder/+internal/matlabCodegenHandle.p",
+ fpath6: "C:/probe-mqp/probe_mqp/APTDriver.m",
+ fpath7: "C:/probe-mqp/probe_mqp/APTStrainGuage.m"
+};
+</script>
+</head>
+<body>
+
+<div class="west">
+<ul class="ui-tabs-nav">
+<li class="ui-tabs-nav-item ui-tabs-selected"><span class="tab-link" id="MATLABcode"><span>MATLAB code</span></span></li>
+<li class="ui-tabs-nav-item"><span class="tab-link" id="callstack"><span>Call stack</span></span></li>
+<li class="ui-tabs-nav-item"><span class="tab-link" id="ccode"><span>C code</span></span></li>
+</ul>
+<div id="MATLABcodebody" class="ui-tabs-panel">
+<!-- Begin Filter -->
+<div class="grayline methodset" onclick="filterClick(event);">
+<a class="collapsed">Filter</a>
+</div>
+<div id="filterbody" class="hidden">
+<table class="myfunc-filter-tbl">
+<tr>
+<td title="Use this filter to display only functions and methods that contain variables or expressions with the specified attributes." colspan="2" class="checkbox">
+<div class="myfunc-filterby-chk"><input type="checkbox" class="filterenable" />
+<div class="filter-enable-lbl">Filter functions and methods</div></div></td></tr><tr>
+<td class="label"><div class="myfunc-filterby-lbl">Filter by:</div></td>
+<td class="select">
+<div class="filters">
+<select class="myfunc-filterby">
+<option id="size">Size</option>
+<option id="complex">Complexity</option>
+<option id="class">Class</option>
+</select>
+</div>
+</td>
+</tr>
+
+<tr>
+<td class="label"><div class="myfunc-filterstr-lbl">Filter:</div></td>
+<td class="input"><div>
+
+<div class="size">
+<select class="myfunc-filter size">
+<option value="2 6 10 12 15 16">1 x 1</option>
+<option value="10">1 x 21</option>
+<option value="2">1 x 4</option>
+</select>
+</div>
+
+<div class="complex">
+<select class="myfunc-filter complex">
+<option value="">Complex values</option>
+<option value="2 12 15 16">Real values</option>
+</select>
+</div>
+<!-- Begin Class Filter -->
+<div class="class">
+<select class="myfunc-filter class">
+<option value="6 10">APTDriver</option>
+<option value="12 15 16">APTStrainGuage</option>
+<option value="2">MVPDriver</option>
+<option value="2 10">char</option>
+<option value="2 12 15 16">double</option>
+<option value="2 6 10 12 15 16">logical</option>
+</select>
+</div>
+<!-- End Class Filter -->
+</div>
+</td>
+</tr>
+</table>
+<div class="myfunc-count"></div>
+</div>
+<!-- End Filter -->
+<div class="grayline methodset" onmouseover="callTreeMouseOver(event);" onmouseout="callTreeMouseOut(event);" onclick="functionSetClick(event);">
+<a class="expanded">Functions</a>
+</div>
+<!-- Begin Function Tree -->
+<div id="functiontreebody">
+<div class="functionwrapper" onmouseover="callTreeMouseOver(event);" onmouseout="callTreeMouseOut(event);" onclick="functionTreeClick(event);">
+<ol class="tree">
+<!-- Begin Function Tree Roots -->
+<li class="leaf  failed"><a href="#" class="fcn " id="F1N13:F1">launchGUI</a></li>
+<!-- End Function Tree Roots -->
+</ol>
+<!-- Function Tree Nodes -->
+<div class="functiontreenodes hidden">
+</div>
+<!-- End Function Tree Nodes -->
+</div>
+</div>
+<!-- End Function Tree -->
+<!-- Begin Class Tree -->
+<div class="grayline methodset" onmouseover="callTreeMouseOver(event);" onmouseout="callTreeMouseOut(event);" onclick="methodSetClick(event);">
+<a class="expanded">Classes</a>
+</div>
+<div id="classlistbody">
+<div class="classwrapper" onmouseover="callTreeMouseOver(event);" onmouseout="callTreeMouseOut(event);" onclick="classTreeClick(event);">
+<ol class="tree">
+<!-- Begin Class Tree Roots -->
+<li class="node collapsed failed"><a class="classroot" title="APTDriver">APTDriver</a>
+<ul>
+<li class="node collapsed failed"><a class="classroot" id="F6N2:M12" title="APTDriver">APTDriver.1</a></li>
+<li class="node collapsed failed"><a class="classroot" id="F10N3:M13" title="APTDriver">APTDriver.2</a></li>
+</ul>
+</li>
+<li class="node collapsed failed"><a class="classroot" title="APTStrainGuage">APTStrainGuage</a>
+<ul>
+<li class="node collapsed failed"><a class="classroot" id="F12N4:M14" title="APTStrainGuage">APTStrainGuage.1</a></li>
+<li class="node collapsed failed"><a class="classroot" id="F14N5:M15" title="APTStrainGuage">APTStrainGuage.2</a></li>
+<li class="node collapsed passed"><a class="classroot" id="F15N6:M16" title="APTStrainGuage">APTStrainGuage.3</a></li>
+<li class="node collapsed failed"><a class="classroot" id="F16N7:M17" title="APTStrainGuage">APTStrainGuage.4</a></li>
+</ul>
+</li>
+<li class="node collapsed passed"><a class="classroot" title="Equipment">Equipment</a>
+<ul>
+<li class="node collapsed passed"><a class="classroot" id="F4N8:M18" title="Equipment">Equipment.1</a></li>
+<li class="node collapsed passed"><a class="classroot" id="F8N9:M19" title="Equipment">Equipment.2</a></li>
+</ul>
+</li>
+<li class="node collapsed failed"><a class="classroot" id="F2N10:M20" title="MVPDriver">MVPDriver</a></li>
+<li class="node collapsed passed"><a class="classroot" title="MotorDriver">MotorDriver</a>
+<ul>
+<li class="node collapsed passed"><a class="classroot" id="F3N11:M21" title="MotorDriver">MotorDriver.1</a></li>
+<li class="node collapsed passed"><a class="classroot" id="F7N12:M22" title="MotorDriver">MotorDriver.2</a></li>
+</ul>
+</li>
+<!-- End Class Tree Roots -->
+</ol>
+<!-- Class Tree Nodes -->
+<div class="classlistnodes hidden">
+<ol class="callstacknode" id="callstacknode2">
+<li class="node collapsed"><a>MVPDriver</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F2N10:m9" title="MVPDriver.MVPDriver">MVPDriver</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode3">
+<li class="node collapsed"><a>MotorDriver.1</a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F3N11:m10" title="MotorDriver.MotorDriver"><span class="default">MotorDriver</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode4">
+<li class="node collapsed"><a>Equipment.1</a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F4N8:m7" title="Equipment.Equipment"><span class="default">Equipment</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode6">
+<li class="node collapsed"><a>APTDriver.1</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F6N2:m1" title="APTDriver.APTDriver">APTDriver</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode7">
+<li class="node collapsed"><a>MotorDriver.2</a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F7N12:m11" title="MotorDriver.MotorDriver"><span class="default">MotorDriver</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode8">
+<li class="node collapsed"><a>Equipment.2</a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F8N9:m8" title="Equipment.Equipment"><span class="default">Equipment</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode10">
+<li class="node collapsed"><a>APTDriver.2</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F10N3:m2" title="APTDriver.initialize">initialize</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode12">
+<li class="node collapsed"><a>APTStrainGuage.1</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F12N4:m3" title="APTStrainGuage.APTStrainGuage">APTStrainGuage</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode14">
+<li class="node collapsed"><a>APTStrainGuage.2</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F14N5:m4" title="APTStrainGuage.createFigure">createFigure</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode15">
+<li class="node collapsed"><a>APTStrainGuage.3</a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F15N6:m5" title="APTStrainGuage.setSerialNumber">setSerialNumber</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode16">
+<li class="node collapsed"><a>APTStrainGuage.4</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F16N7:m6" title="APTStrainGuage.resetControl">resetControl</a></li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<!-- End Class Tree -->
+</div>
+<!-- Begin Call Tree -->
+<div id="callstackbody" class="ui-tabs-panel hidden">
+<div class="treewrapper" onmouseover="callTreeMouseOver(event);" onmouseout="callTreeMouseOut(event);" onclick="callTreeClick(event);">
+<ol class="tree">
+<!-- Call Tree Root -->
+<li class="node collapsed failed"><a href="#" class="fcn " id="F1N13:L1">launchGUI</a>
+<ul>
+<li class="node collapsed failed"><a href="#" class="fcn " id="F2N10:L2" title="MVPDriver.MVPDriver">MVPDriver</a></li>
+<li class="node collapsed failed"><a href="#" class="fcn " id="F6N2:L3" title="APTDriver.APTDriver">APTDriver</a></li>
+<li class="node collapsed failed"><a href="#" class="fcn " id="F12N4:L4" title="APTStrainGuage.APTStrainGuage">APTStrainGuage</a></li>
+</ul>
+</li>
+</ol>
+<!-- Call Tree Nodes -->
+<div class="callstacknodes hidden">
+<ol class="callstacknode" id="callstacknode1">
+
+<li class="node collapsed failed"><a href="#" class="fcn " id="F1N13:l1">launchGUI</a>
+<ul>
+<li class="node collapsed failed"><a href="#" class="fcn " id="F2N10:l2" title="MVPDriver.MVPDriver">MVPDriver</a></li>
+<li class="node collapsed failed"><a href="#" class="fcn " id="F6N2:l3" title="APTDriver.APTDriver">APTDriver</a></li>
+<li class="node collapsed failed"><a href="#" class="fcn " id="F12N4:l4" title="APTStrainGuage.APTStrainGuage">APTStrainGuage</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode2">
+
+<li class="node collapsed failed"><a href="#" class="fcn " id="F2N10:l5" title="MVPDriver.MVPDriver">MVPDriver</a>
+<ul>
+<li class="node collapsed passed"><a href="#" class="fcn " id="F3N11:l6" title="MotorDriver.MotorDriver"><span class="default">MotorDriver</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode3">
+
+<li class="node collapsed passed"><a href="#" class="fcn " id="F3N11:l7" title="MotorDriver.MotorDriver"><span class="default">MotorDriver</span></a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F4N8:l8" title="Equipment.Equipment"><span class="default">Equipment</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode4">
+
+<li class="leaf passed"><a href="#" class="fcn " id="F4N8:l9" title="Equipment.Equipment"><span class="default">Equipment</span></a>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode6">
+
+<li class="node collapsed failed"><a href="#" class="fcn " id="F6N2:l10" title="APTDriver.APTDriver">APTDriver</a>
+<ul>
+<li class="node collapsed passed"><a href="#" class="fcn " id="F7N12:l11" title="MotorDriver.MotorDriver"><span class="default">MotorDriver</span></a></li>
+<li class="leaf failed"><a href="#" class="fcn " id="F10N3:l12" title="APTDriver.initialize">initialize</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode7">
+
+<li class="node collapsed passed"><a href="#" class="fcn " id="F7N12:l13" title="MotorDriver.MotorDriver"><span class="default">MotorDriver</span></a>
+<ul>
+<li class="leaf passed"><a href="#" class="fcn " id="F8N9:l14" title="Equipment.Equipment"><span class="default">Equipment</span></a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode8">
+
+<li class="leaf passed"><a href="#" class="fcn " id="F8N9:l15" title="Equipment.Equipment"><span class="default">Equipment</span></a>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode10">
+
+<li class="leaf failed"><a href="#" class="fcn " id="F10N3:l16" title="APTDriver.initialize">initialize</a>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode12">
+
+<li class="node collapsed failed"><a href="#" class="fcn " id="F12N4:l17" title="APTStrainGuage.APTStrainGuage">APTStrainGuage</a>
+<ul>
+<li class="leaf failed"><a href="#" class="fcn " id="F14N5:l18" title="APTStrainGuage.createFigure">createFigure</a></li>
+<li class="leaf passed"><a href="#" class="fcn " id="F15N6:l19" title="APTStrainGuage.setSerialNumber">setSerialNumber</a></li>
+<li class="leaf failed"><a href="#" class="fcn " id="F16N7:l20" title="APTStrainGuage.resetControl">resetControl</a></li>
+</ul>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode14">
+
+<li class="leaf failed"><a href="#" class="fcn " id="F14N5:l21" title="APTStrainGuage.createFigure">createFigure</a>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode15">
+
+<li class="leaf passed"><a href="#" class="fcn " id="F15N6:l22" title="APTStrainGuage.setSerialNumber">setSerialNumber</a>
+</li>
+</ol>
+<ol class="callstacknode" id="callstacknode16">
+
+<li class="leaf failed"><a href="#" class="fcn " id="F16N7:l23" title="APTStrainGuage.resetControl">resetControl</a>
+</li>
+</ol>
+
+</div>
+</div>
+</div>
+<!-- End Call Tree -->
+<!-- Begin C Code -->
+<div id="ccodebody" class="ui-tabs-panel hidden">
+</div>
+<!-- End C Code -->
+</div>
+<!-- Tooltips -->
+<div class="aux hidden">
+<div class="tooltips">
+<div class="tooltip" id="TT1"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>MVPDriver</td></tr></table></div>
+<div class="tooltip" id="TT2"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>double</td></tr><tr><th>Complex</th><td>No</td></tr></table></div>
+<div class="tooltip" id="TT3"><table class="tooltip"><tr><th>Size</th><td>1 x 4</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT4"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTDriver</td></tr></table></div>
+<div class="tooltip" id="TT5"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>mxArray</td></tr></table></div>
+<div class="tooltip" id="TT6"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTStrainGuage</td></tr></table></div>
+<div class="tooltip" id="TT7"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>MVPDriver</td></tr></table></div>
+<div class="tooltip" id="TT8"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>logical</td></tr></table></div>
+<div class="tooltip" id="TT9"><table class="tooltip"><tr><th>Size</th><td>1 x 8</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT10"><table class="tooltip"><tr><th>Size</th><td>1 x 6</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT11"><table class="tooltip"><tr><th>Size</th><td>1 x 11</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT12"><table class="tooltip"><tr><th>Size</th><td>1 x 13</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT13"><table class="tooltip"><tr><th>Size</th><td>1 x 10</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT14"><table class="tooltip"><tr><th>Size</th><td>1 x 2</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT15"><table class="tooltip"><tr><th>Size</th><td>1 x 9</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT16"><table class="tooltip"><tr><th>Size</th><td>1 x 12</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT17"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTDriver</td></tr></table></div>
+<div class="tooltip" id="TT18"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTDriver</td></tr></table></div>
+<div class="tooltip" id="TT19"><table class="tooltip"><tr><th>Size</th><td>1 x 21</td></tr><tr><th>Class</th><td>char</td></tr></table></div>
+<div class="tooltip" id="TT20"><table class="tooltip"><tr><th>Size</th><td>1 x 4</td></tr><tr><th>Class</th><td>double</td></tr><tr><th>Complex</th><td>No</td></tr></table></div>
+<div class="tooltip" id="TT21"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTStrainGuage</td></tr></table></div>
+<div class="tooltip" id="TT22"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTStrainGuage</td></tr></table></div>
+<div class="tooltip" id="TT23"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTStrainGuage</td></tr></table></div>
+<div class="tooltip" id="TT24"><table class="tooltip"><tr><th>Size</th><td>1 x 1</td></tr><tr><th>Class</th><td>APTStrainGuage</td></tr></table></div>
+<div class="tooltip" id="V1"><table class="tooltip"><tr><th>Value</th><td>     1</br></td></tr></table></div>
+<div class="tooltip" id="V2"><table class="tooltip"><tr><th>Value</th><td>COM4</br></td></tr></table></div>
+<div class="tooltip" id="V3"><table class="tooltip"><tr><th>Value</th><td>    84813062</br></td></tr></table></div>
+</div>
+</div>
+<!-- End Tooltips -->
+
+<div class="south">
+<ul class="ui-tabs-nav">
+<li class="ui-tabs-nav-item"><span class="tab-link" id="summary"><span>Summary</span></span></li>
+<li class="ui-tabs-nav-item ui-tabs-selected"><span class="tab-link" id="messages"><span>All Messages (23)</span></span></li>
+<li class="ui-tabs-nav-item"><span class="tab-link" id="watchlist"><span>Variables</span></span></li>
+<li class="ui-tabs-nav-item hidden"><span class="tab-link" id="watchload"><span>Variables</span></span></li>
+</ul>
+
+<!-- Compilation Summary -->
+<div id="summarybody" class="ui-tabs-panel hidden">
+<table cellpadding="1" cellspacing="4">
+<tr><td>MATLAB code generation attempted on:</td><td>20-Jan-2017 10:04:03</td></tr>
+<tr><td>Coding target:</td><td>C MEX Function</td></tr>
+<tr><td>Number of errors:</td><td><a href="javascript:selectMessagesTab();">23</a></td></tr>
+<tr><td>Number of warnings:</td><td><a href="javascript:selectMessagesTab();">0</a></td></tr>
+<tr><td>Number of notices:</td><td><a href="javascript:selectMessagesTab();">0</a></td></tr>
+</table>
+<p/><p/><table>
+<tr><td><b>Tell Us What You Think</b></td></tr>
+<tr><td>We value your feedback. Please take a few minutes to answer this short questionnaire regarding the Code Generation Report.</td></tr>
+<tr><td><a href="matlab: web('http://www.customersat3.com/TakeSurvey.asp?si=ELu7GTnTYtk%3D','-browser');">&gt;&gt;Provide Feedback</a></td></tr>
+</table>
+</div>
+
+<!-- Message Table -->
+<div id="messagesbody" class="ui-tabs-panel">
+<table class="grid" summary="This table lists the messages produced during code generation." cellspacing="0" cellpadding="6">
+<thead>
+<tr>
+<th id="msgorder" scope="col"><div class="d1"><div class="d2"><a href="#">Order</a></div></div></th>
+<th id="msgtype" scope="col"><div class="d1"><div class="d2"><a href="#">Type</a></div></div></th>
+<th id="function" scope="col"><div class="d1"><div class="d2"><a href="#">Function</a></div></div></th>
+<th id="location" scope="col"><div class="d1"><div class="d2"><a href="#">Line</a></div></div></th>
+<th id="text" scope="col"><div class="d1"><div class="d2"><a href="#">Description</a></div></div></th>
+</tr>
+</thead>
+<tbody onmouseover="messagesMouseOver(event);" onmouseout="messagesMouseOut(event);" onclick="messagesClick(event);"">
+<tr class="message error" id="M1F1">
+<td class="msgorder" headers="msgorder"><a href="#">1</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>2</div></td>
+<td class="text" headers="text"><div>The function 'imaqreset' is not supported for standalone code generation. See the documentation for coder.extrinsic to learn how you can use this function in simulation.</div></td>
+</tr>
+<tr class="message error" id="M9F2">
+<td class="msgorder" headers="msgorder"><a href="#">2</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>MVPDriver</div></td>
+<td class="location" headers="location"><div>91</div></td>
+<td class="text" headers="text"><div>Try and catch are not supported for code generation.</div></td>
+</tr>
+<tr class="message error" id="M10F2">
+<td class="msgorder" headers="msgorder"><a href="#">3</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>MVPDriver</div></td>
+<td class="location" headers="location"><div>92</div></td>
+<td class="text" headers="text"><div>The 'serial' class does not support code generation.</div></td>
+</tr>
+<tr class="message error" id="M2F1">
+<td class="msgorder" headers="msgorder"><a href="#">4</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>3</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M12F10">
+<td class="msgorder" headers="msgorder"><a href="#">5</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>initialize</div></td>
+<td class="location" headers="location"><div>32</div></td>
+<td class="text" headers="text"><div>Code generation only supports initial values of class type for constant properties. Property 'gui' of class 'APTDriver' is not constant.</div></td>
+</tr>
+<tr class="message error" id="M13F10">
+<td class="msgorder" headers="msgorder"><a href="#">6</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>initialize</div></td>
+<td class="location" headers="location"><div>33</div></td>
+<td class="text" headers="text"><div>Property 'hPiezo' is undefined.</div></td>
+</tr>
+<tr class="message error" id="M11F6">
+<td class="msgorder" headers="msgorder"><a href="#">7</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>APTDriver</div></td>
+<td class="location" headers="location"><div>54</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M3F1">
+<td class="msgorder" headers="msgorder"><a href="#">8</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>4</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M16F14">
+<td class="msgorder" headers="msgorder"><a href="#">9</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>createFigure</div></td>
+<td class="location" headers="location"><div>77</div></td>
+<td class="text" headers="text"><div>Function 'get' is resolved in the MATLAB workspace. Please call this function using coder.extrinsic('get') or feval when the input is not a fi, numerictype or a fimath.</div></td>
+</tr>
+<tr class="message error" id="M17F14">
+<td class="msgorder" headers="msgorder"><a href="#">10</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>createFigure</div></td>
+<td class="location" headers="location"><div>77</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M18F14">
+<td class="msgorder" headers="msgorder"><a href="#">11</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>createFigure</div></td>
+<td class="location" headers="location"><div>78</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'fpos'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+<tr class="message error" id="M19F14">
+<td class="msgorder" headers="msgorder"><a href="#">12</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>createFigure</div></td>
+<td class="location" headers="location"><div>79</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'fpos'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+<tr class="message error" id="M20F14">
+<td class="msgorder" headers="msgorder"><a href="#">13</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>createFigure</div></td>
+<td class="location" headers="location"><div>81</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'fpos'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+<tr class="message error" id="M14F12">
+<td class="msgorder" headers="msgorder"><a href="#">14</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>APTStrainGuage</div></td>
+<td class="location" headers="location"><div>19</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M21F16">
+<td class="msgorder" headers="msgorder"><a href="#">15</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>resetControl</div></td>
+<td class="location" headers="location"><div>36</div></td>
+<td class="text" headers="text"><div>Property 'fig' is undefined.</div></td>
+</tr>
+<tr class="message error" id="M22F16">
+<td class="msgorder" headers="msgorder"><a href="#">16</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>resetControl</div></td>
+<td class="location" headers="location"><div>37</div></td>
+<td class="text" headers="text"><div>Property 'hActiveX' is undefined.</div></td>
+</tr>
+<tr class="message error" id="M23F16">
+<td class="msgorder" headers="msgorder"><a href="#">17</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>resetControl</div></td>
+<td class="location" headers="location"><div>38</div></td>
+<td class="text" headers="text"><div>Property 'hActiveX' is undefined.</div></td>
+</tr>
+<tr class="message error" id="M15F12">
+<td class="msgorder" headers="msgorder"><a href="#">18</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>APTStrainGuage</div></td>
+<td class="location" headers="location"><div>21</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M4F1">
+<td class="msgorder" headers="msgorder"><a href="#">19</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>6</div></td>
+<td class="text" headers="text"><div>Function call failed.</div></td>
+</tr>
+<tr class="message error" id="M5F1">
+<td class="msgorder" headers="msgorder"><a href="#">20</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>7</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'aptStrainGuage'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+<tr class="message error" id="M6F1">
+<td class="msgorder" headers="msgorder"><a href="#">21</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>14</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'mvpDriver'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+<tr class="message error" id="M7F1">
+<td class="msgorder" headers="msgorder"><a href="#">22</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>16</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'myModel'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+<tr class="message error" id="M8F1">
+<td class="msgorder" headers="msgorder"><a href="#">23</a></td>
+<td class="failed" headers="msgtype"></td>
+<td class="function" headers="function"><div>launchGUI</div></td>
+<td class="location" headers="location"><div>17</div></td>
+<td class="text" headers="text"><div>Undefined function or variable 'myModel'. The first assignment to a local variable determines its class.</div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Watchlist Table -->
+<div id="watchlistbody" class="ui-tabs-panel hidden">
+</div>
+<div id="watchloadbody" class="ui-tabs-panel hidden">
+Loading Variables table ...
+</div>
+
+</div>
+<!-- Begin MATLAB Code Panel -->
+<div class="center">
+<div class="center-title">
+<div class="ui-tabs-nav-item ui-tabs-selected">
+<span class="functiontitle">
+</span>
+<!-- Begin Call Sites -->
+<span id="callsiteselecttable" class="call-sites-tbl">
+<span id="callsiteselectlabel" class="filtered">Calls:</span>
+<select id="callsiteselect" onchange="callSiteChange(event)">
+<option value="callsiteprompt">Select a function call:</option>
+</select>
+</span>
+<!-- End Call Sites -->
+</div>
+</div>
+<div class="ui-tabs-panel">
+<div class="code" onmouseover="mcodeMouseOver(event);" onmouseout="mcodeMouseOut(event);"onclick="mcodeClick(event);">
+</div>
+</div>
+</div>
+<!-- End MATLAB Code Panel -->
+</body>
+</html>

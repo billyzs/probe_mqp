@@ -28,7 +28,7 @@ classdef MainModel < handle
         %end
         
         function startPollingTimer(this)
-            this.pollingTimer = timer('Period', .1, 'TasksToExecute', Inf, ...
+            this.pollingTimer = timer('Period', .5, 'TasksToExecute', Inf, ...
             'ExecutionMode', 'fixedRate', 'TimerFcn', @this.pollingTimerCallback);
             start(this.pollingTimer);
         end
@@ -71,8 +71,8 @@ classdef MainModel < handle
         end
         
         function captureImage(this, path)
-            if (this.cameraActive == true && ~isempty(this.camera))
-                im = step(this.camera);
+            if (this.cameraActive == true && ~isempty(this.camera) && ~isempty(path))
+                im = this.camera.getImageData();
                 imwrite(im, path);
             end
         end
