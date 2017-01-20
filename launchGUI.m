@@ -11,6 +11,7 @@ pause(4);
 % mvpDriver = 1;
 % aptDriver = 1;
 % aptStrainGuage = 1;
+
 myModel = MainModel(mvpDriver,aptDriver,aptStrainGuage);
 
 myController = MainController(myModel);
