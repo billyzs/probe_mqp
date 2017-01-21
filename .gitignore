@@ -6,6 +6,14 @@
 ## We have git for backups!
 ##---------------------------------------------------
 
+# automatically generated files
+codegen/
+launchGUI.prj
+
+#binary files
+*.mat
+*.bmp
+
 # Windows default autosave extension
 *.asv
 
