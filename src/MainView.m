@@ -9,16 +9,20 @@ classdef MainView < handle
         captureImageButton;
     	captureVideoButton;
     	currentPositionTextArea;
-    	naDistanceTextField;
-    	piezoDistanceTextField;
     	positionButton;
     	probeButton;
     	returnButton;
     	saveDataButton;
-    	stepNAButton;
-        stepPiezoButton;
+    	jogButton;
+        positionTextField;
     	targetPositionTextField;
         motorsEnableButton;
+        moveModeComboBox;
+        activeMotorComboBox;
+        jogXNegButton;
+        jogXPosButton;
+        jogYNegButton;
+        jogYPosButton;
     end
     
     methods
@@ -44,31 +48,41 @@ classdef MainView < handle
             this.captureImageButton      = handle(this.jFrame.getCaptureImageButton(),      'CallbackProperties');
             this.captureVideoButton      = handle(this.jFrame.getCaptureVideoButton(),      'CallbackProperties');
             this.currentPositionTextArea = handle(this.jFrame.getCurrentPositionTextArea(), 'CallbackProperties');
-            this.naDistanceTextField     = handle(this.jFrame.getNADistanceTextField(),     'CallbackProperties');
-            this.piezoDistanceTextField  = handle(this.jFrame.getPiezoDistanceTextField(),  'CallbackProperties');
+            this.positionTextField       = handle(this.jFrame.getPositionTextField(),       'CallbackProperties');
             this.positionButton          = handle(this.jFrame.getPositionButton(),          'CallbackProperties');
             this.probeButton             = handle(this.jFrame.getProbeButton(),             'CallbackProperties');
             this.returnButton            = handle(this.jFrame.getReturnButton(),            'CallbackProperties');
             this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
-            this.stepNAButton            = handle(this.jFrame.getStepNAButton(),            'CallbackProperties');
-            this.stepPiezoButton         = handle(this.jFrame.getStepPiezoButton(),         'CallbackProperties');
+            this.jogButton               = handle(this.jFrame.getJogButton(),               'CallbackProperties');
             this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
-            this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties');
+            this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties'); 
+            this.moveModeComboBox        = handle(this.jFrame.getMoveModeComboBox(),        'CallbackProperties');
+            this.activeMotorComboBox     = handle(this.jFrame.getActiveMotorComboBox(),     'CallbackProperties');
+            this.jogXNegButton           = handle(this.jFrame.getJogXNegButton(),           'CallbackProperties');
+            this.jogXPosButton           = handle(this.jFrame.getJogXPosButton(),           'CallbackProperties');
+            this.jogYNegButton           = handle(this.jFrame.getJogYNegButton(),           'CallbackProperties');
+            this.jogYPosButton           = handle(this.jFrame.getJogYPosButton(),           'CallbackProperties');
+            
             % Set Java object callbacks
             set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
             set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
             set(this.captureVideoButton,      'ActionPerformedCallback', @this.captureVideoButtonCallback);
-            set(this.naDistanceTextField,     'ActionPerformedCallback', @this.naDistanceTextFieldCallback);
-            set(this.piezoDistanceTextField,  'ActionPerformedCallback', @this.piezoDistanceTextFieldCallback);
+            set(this.positionTextField,       'ActionPerformedCallback', @this.positionTextFieldCallback);
             set(this.positionButton,          'ActionPerformedCallback', @this.positionButtonCallback);
             set(this.probeButton,             'ActionPerformedCallback', @this.probeButtonCallback);
             set(this.returnButton,            'ActionPerformedCallback', @this.returnButtonCallback);
             set(this.saveDataButton,          'ActionPerformedCallback', @this.saveDataButtonCallback);
-            set(this.stepNAButton,            'ActionPerformedCallback', @this.stepNAButtonCallback);
-            set(this.stepPiezoButton,         'ActionPerformedCallback', @this.stepPiezoButtonCallback);
+            set(this.jogButton,               'ActionPerformedCallback', @this.jogButtonCallback);
             set(this.targetPositionTextField, 'ActionPerformedCallback', @this.targetPositionTextFieldCallback);
             set(this.motorsEnableButton,      'ActionPerformedCallback', @this.motorsEnableButtonCallback);
+            set(this.moveModeComboBox,        'ActionPerformedCallback', @this.moveModeComboBoxCallback);
+            set(this.activeMotorComboBox,     'ActionPerformedCallback', @this.activeMotorComboBoxCallback);
+            set(this.jogXNegButton,           'ActionPerformedCallback', @this.jogXNegButtonCallback);
+            set(this.jogXPosButton,           'ActionPerformedCallback', @this.jogXPosButtonCallback);
+            set(this.jogYNegButton,           'ActionPerformedCallback', @this.jogYNegButtonCallback);
+            set(this.jogYPosButton,           'ActionPerformedCallback', @this.jogYPosButtonCallback);
             
+           
             
             % Display the Java window
             this.jFrame.setVisible(true);
@@ -107,9 +121,7 @@ classdef MainView < handle
         end
         function captureVideoButtonCallback(this, hObject, hEventData)
         end
-        function naDistanceTextFieldCallback(this, hObject, hEventData)
-        end
-        function piezoDistanceTextFieldCallback(this, hObject, hEventData)
+        function positionTextFieldCallback(this, hObject, hEventData)
         end
         function positionButtonCallback(this, hObject, hEventData)
         end
@@ -119,14 +131,28 @@ classdef MainView < handle
         end
         function saveDataButtonCallback(this, hObject, hEventData)
         end
-        function stepNAButtonCallback(this, hObject, hEventData)
+        %!!! (A) Edit from A to B
+        function moveModeComboBoxCallback(this, hObject, hEventData)
+        end
+        function activeMotorComboBoxCallback(this, hObject, hEventData)
+        end
+        function jogXNegButtonCallback(this, hObject, hEventData)
+        end
+        function jogXPosButtonCallback(this, hObject, hEventData)
+        end
+        function jogYNegButtonCallback(this, hObject, hEventData)
+        end
+        function jogYPosButtonCallback(this, hObject, hEventData)
+        end
+        %!!! (B) Edit done
+        function jogButtonCallback(this, hObject, hEventData) %!!! edit this----
             if (this.controller.getMotorsEnabled())
                 distanceStr = this.naDistanceTextField.getText();
                 distance = str2num(distanceStr);
                 this.controller.moveManualNA(distance);
             end
         end
-        function stepPiezoButtonCallback(this, hObject, hEventData)
+        function stepPiezoButtonCallback(this, hObject, hEventData) %!!! edit this ----
             if (this.controller.getMotorsEnabled())
                 distanceStr = this.piezoDistanceTextField.getText();
                 distance = str2num(distanceStr);

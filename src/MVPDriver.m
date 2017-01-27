@@ -43,38 +43,46 @@ classdef MVPDriver < MotorDriver
                 rethrow(exception);
             end
         end
+        
         function disable(this)
             if (this.isConnected())
                 fclose(this.comPort);
             end
         end
-        function success = doMove(this, displacement, vel, accel)
+        
+        function setMoveMode(this, moveMode)
+            switch moveMode
+                case 'Absolute'
+                    %!!! need to figure out which commands will make this
+                    %work
+                    this.moveMode = moveMode;
+                case 'Relative'
+                    this.moveMode = moveMode;
+                otherwise
+                    warning('Unexpected move mode requested')
+            end
+        end
+        
+        function setVelocity(this, vel)
+            this.writeCmd('SP', vel);
+            this.velocity = vel;
+        end
+        
+        function setAcceleration(this, accel)
+            this.writeCmd('AC', accel);
+            this.velocity = accel;
+        end
+        
+        function success = doMove(this, displacement)
             success = 0;
             try
-                if nargin == 4
-                    prefix = {'LA', 'SP', 'AC'};
-                    cmd = [displacement, vel, accel];
-                elseif nargin == 3
-                    prefix = {'LA', 'SP'};
-                    cmd = [displacement, vel];
-                else
-                    prefix = {'LA'};
-                    cmd = [displacement];
-                end
-
                 % parse & write command
-
-                for t = 1:(nargin-1)
-                    this.writeCmd(char(prefix(t)), cmd(t));
-                end
+                this.writeCmd('LA', displacement);
+                
                 % write move cmd and get status;
                 pause(0.2); %% definitely need this pause...
                 this.writeCmd('M');
-
-                % this.writeCmd('M');
-                % pos = fscanf(this.comPort);
-                % this.writeCmd('ST');
-                % status = fscanf(this.comPort);
+                
                 success = 1;
             catch exception
                 rethrow(exception);
@@ -82,6 +90,7 @@ classdef MVPDriver < MotorDriver
         end
         
     end
+    
     methods (Access=public)
         % constructor
         function obj = MVPDriver(addr, port)
@@ -137,6 +146,7 @@ classdef MVPDriver < MotorDriver
                 rethrow(ME);
             end
         end
+        
         function cp = getComPort(this)
             cp = this.comPort;
         end

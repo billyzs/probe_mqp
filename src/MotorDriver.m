@@ -7,6 +7,9 @@ classdef (Abstract) MotorDriver < Equipment
         maxVelocity;
         maxAcceleration;
         displacement;
+        velocity;
+        acceleration;
+        moveMode;
         moves; % moves is a n*3 Array (Stack) containing the past moves
     end
     
@@ -18,7 +21,10 @@ classdef (Abstract) MotorDriver < Equipment
         % Constructors and destructors should be defined in subclasses
         
         % Specify the displacement, velocity, acceleration of a move
-        success = doMove(this, displacement, velocity, acceleration)   
+        success = doMove(this, displacement)
+        setMoveMode(this, moveMode)
+        setVelocity(this, vel)
+        setAcceleration(this, accel)
         enable(this)
         disable(this)
         
@@ -26,39 +32,61 @@ classdef (Abstract) MotorDriver < Equipment
     
     methods (Access=public)
         
-        function valid = isMoveValid(this, displacement, velocity, acceleration)
-            valid = 0;
-            if ( ...
-                     (velocity < this.maxVelocity)... 
-                    )
-                % do something
-                valid = 1;
-            else
-                errMsg = [this.name,  '::isMoveValid::'];
-                if (this.displacement + displacement > this.maxDisplacement)
-                    errMsg = [errMsg  'displacement exceeds maxDisplacement: would be ', ...
-                        + num2str(this.displacement + displacement)] + ';'; 
-                end
-                if (velocity > this.maxVelocity)
-                     errMsg = [errMsg, 'vel exceeds maxVelocity: ', ...
-                         num2str(velocity), ' vs ',  num2str(this.maxVelocity)  ';'];
-                end
-                if (acceleration > this.maxAcceleration)
-                     errMsg = [errMsg  'acc exceeds maxAcceleration: ' ...
-                         num2str(acceleration) ' vs ' num2str(this.maxAcceleration) ';'];
-                end
+        
+        function valid = isPositionValid(this, position)
+            valid = 1;
+            if (position > this.maxDisplacement)
+                errMsg = [this.name,  '::isPositionValid::'];
+                errMsg = [errMsg  'target position exceeds maxDisplacement: would be ', ...
+                    + num2str(position)] + ';';
                 error(errMsg);
+                valid = 0;
             end
         end
         
-        function success = move(this, displacement, velocity, acceleration)
+        function valid = isMoveValid(this, displacement)
+            switch this.moveMode
+                case 'Absolute'
+                    valid = isPositionValid(this.displacement);
+                case 'Relative'
+                    valid = isPositionValid(this.displacement + displacement);
+                otherwise
+                    warning('Unexpected move mode requested')
+                    valid = 0;
+            end
+        end
+        
+        function valid = isVelocityValid(this, velocity)
+            valid = 1;
+            if (velocity > this.maxVelocity)
+                errMsg = [this.name,  '::isVelocityValid::'];
+                errMsg = [errMsg, 'vel exceeds maxVelocity: ', ...
+                    num2str(velocity), ' vs ',  num2str(this.maxVelocity)  ';'];
+                error(errMsg);
+                valid = 0;
+            end
+        end
+        
+        function valid = isAccelerationValid(this, acceleration)
+            valid = 1;
+            if (acceleration > this.maxAcceleration)
+                errMsg = [this.name,  '::isVAccelerationValid::'];
+                errMsg = [errMsg  'acc exceeds maxAcceleration: ' ...
+                    num2str(acceleration) ' vs ' num2str(this.maxAcceleration) ';'];
+                error(errMsg);
+                valid = 0;
+            end
+        end
+        
+        function success = move(this, displacement)
             success = 0;
             try
-                if(true == isMoveValid(this, displacement, velocity, acceleration))
-                    success = doMove(this, displacement, velocity, acceleration);
+                if(true == isMoveValid(this, displacement))
+                    success = doMove(this, displacement);
                     if success
-                        this.moves = [displacement, velocity, acceleration; this.moves]; %LIFO
-                        this.displacement = this.displacement + displacement;
+                        %!!! Move history needs to be fleshed out more. 
+                        this.moves = [position, this.velocity, this.acceleration; this.moves]; %LIFO
+                        this.displacement = position; %!!! Should find way to integrate this with actual readings
                     end
                     return
                 end
@@ -66,6 +94,7 @@ classdef (Abstract) MotorDriver < Equipment
                 rethrow(exception);
             end
         end
+        
         function success = defaultMove(this, displacement)
             success = move(this, displacement, this.defaultVelocity, this.defaultAcceleration);
         end
