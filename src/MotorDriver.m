@@ -1,41 +1,52 @@
 classdef (Abstract) MotorDriver < Equipment
-   
+   % MotorDriver An abstract class used to construct actuator classes
+   % Extends Equipment
     properties (Access=protected, Abstract)
-        defaultVelocity;
-        defaultAcceleration;
+        % Num The maximum displacement allowed
         maxDisplacement;
+        % Num The maximum velocity allowed
         maxVelocity;
+        % Num The maximum acceleration allowed
         maxAcceleration;
+        % Num The current displacement
         displacement;
+        % Num The current velocity
         velocity;
+        % Num The current acceleration
         acceleration;
+        % The movement method that will be used on move commands 
+        % Relative or Absolute
         moveMode;
-        moves; % moves is a n*3 Array (Stack) containing the past moves
-    end
-    
-    properties (Access=protected)
-        % sequence of moves
     end
     
     methods (Access=public, Abstract)
         % Constructors and destructors should be defined in subclasses
         
-        % Specify the displacement, velocity, acceleration of a move
+        % Function to execute a move of the given displacement
         success = doMove(this, displacement)
+        % Function to set the movement method that will be used
         setMoveMode(this, moveMode)
+        % Function to set the velocity to use on doMove commands
         setVelocity(this, vel)
+        % Function to set the acceleration to use on doMove commands
         setAcceleration(this, accel)
+        % Function to retreve the hardware calculated displacement if
+        % available. Optional displacement parameter can be used as seen
+        % fit.
+        updateDisplacement(this, displacement)
+        % Function to enable the motor hardware
         enable(this)
+        % Function to disable the motor hardware
         disable(this)
         
     end
     
     methods (Access=public)
         
-        
+        % Function evalutates the validity of a given position
         function valid = isPositionValid(this, position)
             valid = 1;
-            if (position > this.maxDisplacement)
+            if (abs(position) > this.maxDisplacement)
                 errMsg = [this.name,  '::isPositionValid::'];
                 errMsg = [errMsg  'target position exceeds maxDisplacement: would be ', ...
                     + num2str(position)] + ';';
@@ -44,7 +55,9 @@ classdef (Abstract) MotorDriver < Equipment
             end
         end
         
+        % Function evaluates the validity of an attempted move command
         function valid = isMoveValid(this, displacement)
+            %Check if the target is valid
             switch this.moveMode
                 case 'Absolute'
                     valid = isPositionValid(this.displacement);
@@ -54,11 +67,16 @@ classdef (Abstract) MotorDriver < Equipment
                     warning('Unexpected move mode requested')
                     valid = 0;
             end
+            if (~isVelocityValid(this.velocity) || ~isAccelerationValid(this.acceleration))
+                warning('Move requested without valid accerlation or velocity')
+                valid = 0;
+            end
         end
         
+        % Function evaluates the validity of a given velocity
         function valid = isVelocityValid(this, velocity)
             valid = 1;
-            if (velocity > this.maxVelocity)
+            if (velocity > this.maxVelocity || velocity <= 0)
                 errMsg = [this.name,  '::isVelocityValid::'];
                 errMsg = [errMsg, 'vel exceeds maxVelocity: ', ...
                     num2str(velocity), ' vs ',  num2str(this.maxVelocity)  ';'];
@@ -67,9 +85,10 @@ classdef (Abstract) MotorDriver < Equipment
             end
         end
         
+        % Function evaluates the validity of a given acceleration
         function valid = isAccelerationValid(this, acceleration)
             valid = 1;
-            if (acceleration > this.maxAcceleration)
+            if (acceleration > this.maxAcceleration || acceleration <= 0)
                 errMsg = [this.name,  '::isVAccelerationValid::'];
                 errMsg = [errMsg  'acc exceeds maxAcceleration: ' ...
                     num2str(acceleration) ' vs ' num2str(this.maxAcceleration) ';'];
@@ -78,15 +97,18 @@ classdef (Abstract) MotorDriver < Equipment
             end
         end
         
+        % Function moves the motor the given displacement. Throws exception
         function success = move(this, displacement)
             success = 0;
             try
                 if(true == isMoveValid(this, displacement))
                     success = doMove(this, displacement);
-                    if success
-                        %!!! Move history needs to be fleshed out more. 
-                        this.moves = [position, this.velocity, this.acceleration; this.moves]; %LIFO
-                        this.displacement = position; %!!! Should find way to integrate this with actual readings
+                    if success 
+                        this.moves = [this.moveMode,... 
+                                       displacement,... 
+                                       this.velocity,... 
+                                       this.acceleration; this.moves]; %LIFO
+                        updateDisplacement(displacement);
                     end
                     return
                 end
@@ -95,35 +117,43 @@ classdef (Abstract) MotorDriver < Equipment
             end
         end
         
-        function success = defaultMove(this, displacement)
-            success = move(this, displacement, this.defaultVelocity, this.defaultAcceleration);
+        % Function to undo the previous move command 
+        function [success, undoneMove] = undoLastMove(this)
+            if (~isempty(this.moves))
+                undoneMove = this.moves(1,:);
+                setMoveMode(undoneMove(1,1));
+                setVelocity(undoneMove(1,3));
+                setAcceleration(undoneMove(1,4));
+
+                position = undoneMove(1,2);
+
+                if (~strcmp(this.moveMode,'Absolute'))
+                    position = -position;
+                end
+                undoneMove(1,2) = position;
+                success = doMove(position);
+                this.moves = this.moves(2,:, :); % pops the lase move
+            else
+                undoneMove = ['Relative',0,0,0];
+                success = 0;
+            end
         end
         
-        function success = undoLastMove(this)
-            success = doMove(-this.moves(1,1), -this.moves(1,2), -this.moves(1,3));
-            this.moves = this.moves(2,:, :); % pops the lase move
-        end
+        % Function to undo all the past move commands 
         function success = undoAll(this)
-            newMoves = zeros(size(this.moves,1), 3);
+            newMoves = [];
             success = 1;
-            for n = 1:size(this.moves,1)
-                success = success && doMove(this, -this.moves(n,1), -this.moves(n,2), -this.moves(n,3));
-                newMoves(size(this.moves,1)-n+1, :) = [-this.moves(n,1), -this.moves(n,2), -this.moves(n,3)];
+            while(success == 1)
+                [success, undoneMove] = undoLastMove();
+                newMoves = [undoneMove; newMoves];
             end
+            this.moves = newMoves;
         end
     end
     
-    methods (Access=public) % getters & setters
-             
-        function v = getDefaultVelocity(this)
-            v = this.defaultVelocity;
-        end
-        
-        function a = getDefaultAcceleration(this)
-            a = this.defaultAcceleration;
-        end
+    methods (Access=public) % Getters and Setters
                
-        function md = getMaxMaxDisplacement(this)
+        function md = getMaxDisplacement(this)
             md = this.maxDisplacement;
         end
         
@@ -135,21 +165,21 @@ classdef (Abstract) MotorDriver < Equipment
             ma = this.maxAcceleration;
         end
         
-        function d = getDisplacement(this)
-            d = this.displacement;
+        function displacement = getDisplacement(this)
+            displacement = this.displacement;
+        end
+        
+        function acceleration = getAcceleration(this)
+            acceleration = this.acceleration;
+        end
+        
+        function velocity = getVelocity(this)
+            velocity = this.velocity;
         end
         
         %===========
-        
-        function setDefaultVelocity(this, v)
-            this.defaultVelocity = v;
-        end
-        
-        function setDefaultAcceleration(this, a)
-            this.defaultAcceleration = a;
-        end
                
-        function setMaxMaxDisplacement(this, md)
+        function setMaxDisplacement(this, md)
             this.maxDisplacement = md;
         end
         
@@ -160,5 +190,6 @@ classdef (Abstract) MotorDriver < Equipment
         function setMaxAcceleration(this, ma)
             this.maxAcceleration = ma;
         end
+        
     end
 end
