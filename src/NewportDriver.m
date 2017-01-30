@@ -1,6 +1,6 @@
 classdef NewportDriver < MotorDriver
     %NewportDriver Class to interface with the newport stages
-    %   Extends MotorDriver
+    %   Extends MotorDriver and implements required methods
 
     properties (Access=protected)
         % Name of the controller
@@ -11,8 +11,8 @@ classdef NewportDriver < MotorDriver
         maxVelocity = 1;
         maxAcceleration = 1;
         displacement = 0;
-        velocity = .001;
-        acceleration = .001;
+        velocity = 1;
+        acceleration = 1;
         
         % List of axis numbers controller by this object
         numAxis = 0;
@@ -22,6 +22,8 @@ classdef NewportDriver < MotorDriver
         activeAxis = 2;
         % Array of displacements for each axis
         displacementList = [];
+        %The movement mode that will be used. "Absolute" or "Relative"
+        moveMode = 'Relative';
     end
     
     methods (Access=private)
@@ -29,6 +31,8 @@ classdef NewportDriver < MotorDriver
         function connect(this)
             if (~libisloaded(this.driverLibrary))
                 loadlibrary(this.driverLibrary);
+                [error] = calllib(this.driverLibrary,'esp_init_system');
+                this.catchAndPrintError(error);
             end
         end
         
@@ -36,6 +40,7 @@ classdef NewportDriver < MotorDriver
         function enableMotor(this)
             for axis = 1:this.numAxis
                 [error] = calllib(this.driverLibrary,'esp_enable_motor', axis);
+                this.catchAndPrintError(error);
             end
         end
     end
@@ -71,6 +76,7 @@ classdef NewportDriver < MotorDriver
             if (libisloaded(this.driverLibrary))
                 for axis = 1:this.numAxis
                     [error] = calllib(this.driverLibrary,'esp_disable_motor', axis);
+                    this.catchAndPrintError(error);
                 end
             end
         end
@@ -85,8 +91,9 @@ classdef NewportDriver < MotorDriver
         % Function to execute a move of the given displacement
         function success = doMove(this, displacement)
             success = 0;
+            error = 0;
             if (libisloaded(this.driverLibrary))
-                switch moveMode
+                switch this.moveMode
                     case 'Absolute'
                         [error] = calllib(this.driverLibrary,'esp_move_absolute', this.activeAxis, displacement);
                     case 'Relative'
@@ -94,6 +101,7 @@ classdef NewportDriver < MotorDriver
                     otherwise
                         warning('Unexpected move mode requested')
                 end
+                this.catchAndPrintError(error);
                 % write move cmd and get status;
                 success = 1;
             end
@@ -115,8 +123,11 @@ classdef NewportDriver < MotorDriver
         function updateDisplacement(this, displacement)
             if (nargin == 2)
                 % If filtering is used with target displacement
-            else
-                
+            end
+            if (isnumeric(displacement))
+                [error, displacement] = calllib(this.driverLibrary,'esp_get_position', this.activeAxis, displacement);
+                this.displacement = displacement;
+                this.catchAndPrintError(error);
             end
         end
         
@@ -124,6 +135,7 @@ classdef NewportDriver < MotorDriver
         function setAcceleration(this, accel)
             if (libisloaded(this.driverLibrary))
                 [error] = calllib(this.driverLibrary,'esp_set_accel', this.activeAxis, accel);
+                this.catchAndPrintError(error);
             end
         end
         
@@ -131,6 +143,7 @@ classdef NewportDriver < MotorDriver
         function setVelocity(this, vel)
             if (libisloaded(this.driverLibrary))
                 [error] = calllib(this.driverLibrary,'esp_set_speed', this.activeAxis, vel);
+                this.catchAndPrintError(error);
             end
         end
         
@@ -139,6 +152,7 @@ classdef NewportDriver < MotorDriver
             if (libisloaded(this.driverLibrary))
                 accel = 0;
                 [error, accel] = calllib(this.driverLibrary,'esp_get_accel', this.activeAxis, accel);
+                this.catchAndPrintError(error);
             end
         end
         
@@ -147,7 +161,34 @@ classdef NewportDriver < MotorDriver
             if (libisloaded(this.driverLibrary))
                 vel = 0;
                 [error, vel] = calllib(this.driverLibrary,'esp_get_speed', this.activeAxis, vel);
+                this.catchAndPrintError(error);
             end
+        end
+        
+        %Function to check if there is an error message and return it
+        function [errorStr, errorNum, timeStamp] = catchErrors(this, errorExists)
+            errorStr = '';
+            errorPtr = libpointer('cstring', errorStr);
+            errorNum = -1;
+            timeStamp = -1;
+            if (errorExists)
+                [errorcode, errorStr, errorNum, timeStamp] = ...
+                    calllib(this.driverLibrary,'esp_get_error_string',...
+                    errorPtr, errorNum, timeStamp);
+            end
+        end
+        
+        %Function to print error messages in readable format
+        function printError(this, errorStr, errorNum, timeStamp)
+            if (errorNum ~= -1)
+                warning(['Error: ' num2str(errorNum) ' Time: ' timeStamp errorStr]);
+            end
+        end
+        
+        %Function to catch and print and error for convienance
+        function catchAndPrintError(this, errorExists)
+            [errorStr, errorNum, timeStamp] = this.catchErrors(errorExists);
+            printError(this, errorStr, errorNum, timeStamp)
         end
     end
 

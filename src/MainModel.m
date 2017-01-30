@@ -3,14 +3,8 @@ classdef MainModel < handle
         %State Variables
         cameraActive = false;
         motorsEnabled = false;
-        piezoPosition = 0;
-        NAPosition = 0;
-        newportXPosition = 0;
-        newportYPosition = 0;
-        activeMotor = '';
-        
-        %Timers
-        pollingTimer;
+        activeMotor;
+        displacementUpdated = false;
         %Equipment
         mvpDriver;
         aptDriver;
@@ -27,77 +21,83 @@ classdef MainModel < handle
             this.aptDriver = aptDriver;
             this.aptStrainGuage = aptStrainGuage;
             this.newportDriver = newportDriver;
+            this.activeMotor = this.newportDriver;
+            this.motorsEnabled = true;
         end
         
-        %function setMVPDriver(this, mvpDriver)
-        %   this.mvpDriver = mvpDriver;
-        %end
-        
-        function startPollingTimer(this)
-            this.pollingTimer = timer('Period', .5, 'TasksToExecute', Inf, ...
-            'ExecutionMode', 'fixedRate', 'TimerFcn', @this.pollingTimerCallback);
-            start(this.pollingTimer);
-        end
         function enableMotors(this)
+            'Enableing...'
+            drawnow('update')
             this.mvpDriver.enable();
             this.aptDriver.enable();
+            this.newportDriver.enable();
             this.motorsEnabled = true;
+            'Motors Enabled'
         end
         function disableMotors(this)
             this.mvpDriver.disable();
             this.aptDriver.disable();
+            this.newportDriver.disable();
             this.motorsEnabled = false;
         end
         
         function setActiveMotor(this, motorStr)
-            this.activeMotor = motorStr;
-        end
-        
-        function motorStr = getActiveMotor(this)
-            motorStr = this.activeMotor;
-        end
-        
-        function setActiveMotorPosition(this, position)
-            switch this.activeMotor
+            switch motorStr
                 case 'National Aperture' 
-                    this.moveAbsoluteNA(position);
+                    this.activeMotor = this.mvpDriver;
                 case 'Piezo'
-                    this.moveAbsolutePiezo(position);
+                    this.activeMotor = this.aptDriver;
                 case 'Newport XY'
+                    this.activeMotor = this.newportDriver;
                 otherwise
-                    warning('Unexpected active motor type')
-            end
-        end    
-        
-        function moveAbsoluteNA(this, distance)
-            if (isnumeric(distance) && ~isempty(distance))
-                this.mvpDriver.defaultMove(distance);
-                this.NAPosition = this.NAPosition + distance;
-            end
-        end
-        function moveAbsolutePiezo(this, distance)
-            if (isnumeric(distance) && ~isempty(distance))
-                this.aptDriver.defaultMove(distance);
-            end
-        end
-        function moveAbsoluteNewport(this, x_pos, y_pos)
-            if (isnumeric(x_pos) && ~isempty(x_pos)...
-                && isnumeric(y_pos) && ~isempty(y_pos))
-                this.newportDriver.move(distance);
+                    warning('Unexpected active motor type. Active motor unchanged.')
             end
         end
         
-         function setActiveAxis(this, axis)
-            this.activeAxis = axis;
+        
+        function motor = getActiveMotor(this)
+            motor = this.activeMotor;
         end
         
-        function success = doMove(this, displacement, vel, accel)
+        function setActiveMotorMoveMode(this, moveMode)
+            this.activeMotor.setMoveMode(moveMode);
+        end
         
-        function pollingTimerCallback(this, src, evt)
-            piezoPosition = this.aptStrainGuage.getPosition();
-            if (this.piezoPosition ~= piezoPosition)
-                this.piezoPosition = piezoPosition;
+        function moveActiveMotor(this, displacement)
+            if (isnumeric(displacement) && ~isempty(displacement))
+                this.activeMotor.move(displacement);
+                this.activeMotor.updateDisplacement(displacement);
+                this.displacementUpdated = ~this.displacementUpdated;
             end
+        end
+        
+        function numAxis = getAvailableJogAxis(this)
+            numAxis = 0;
+            switch this.activeMotor
+                case this.mvpDriver 
+                    numAxis = 1;
+                case this.aptDriver
+                    numAxis = 1;
+                case this.newportDriver
+                    numAxis = 2;
+                otherwise
+                    warning('Unexpected active motor type. Num Axis set to 0')
+            end
+        end
+        
+        function displacements = getDisplacements(this)
+%             displacements = [this.mvpDriver.getDisplacement(),...
+%                              this.aptDriver.getDisplacement(),...
+%                              this.newportDriver.getDisplacement()];
+            displacements = [0,...
+                             0,...
+                             this.newportDriver.getDisplacement()];
+        end
+        
+        function setActiveAxis(this, axis)
+           if (this.activeMotor == this.newportDriver)
+               this.newportDriver.setActiveAxis(axis);
+           end
         end
         
         function camera = getCamera(this)

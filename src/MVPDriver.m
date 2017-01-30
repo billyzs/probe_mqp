@@ -16,6 +16,7 @@ classdef MVPDriver < MotorDriver
         displacement = 0;
         velocity = 100;
         acceleration = 100;
+        moveMode = 'Relative';
         
     end
     
@@ -23,7 +24,7 @@ classdef MVPDriver < MotorDriver
         % Function to connect to MVP controller by sending Home command.
         % Also sets the stage position at 0
         function connect(this)
-            this.setDisplacement(0);
+            this.displacement = 0;
             this.writeCmd('HO');
         end
         % Function to enable the motors connected to the MVP controller

@@ -23,6 +23,7 @@ classdef MainView < handle
         jogXPosButton;
         jogYNegButton;
         jogYPosButton;
+        jogDistance = 0;
     end
     
     methods
@@ -31,7 +32,7 @@ classdef MainView < handle
             this.model = controller.model;
            % this.gui = mainGUI('controller',this.controller);
             
-            addlistener(this.model,'piezoPosition','PostSet', ...
+            addlistener(this.model,'displacementUpdated','PostSet', ...
                 @this.handlePropEvents);
         
             this.launchView();
@@ -122,6 +123,7 @@ classdef MainView < handle
         function captureVideoButtonCallback(this, hObject, hEventData)
         end
         function positionTextFieldCallback(this, hObject, hEventData)
+            this.jogDistance = str2num(this.positionTextField.getText());
         end
         function positionButtonCallback(this, hObject, hEventData)
         end
@@ -131,24 +133,66 @@ classdef MainView < handle
         end
         function saveDataButtonCallback(this, hObject, hEventData)
         end
-        %!!! (A) Edit from A to B
+      
         function moveModeComboBoxCallback(this, hObject, hEventData)
+            moveModeStr = this.moveModeComboBox.getSelectedItem();
+            this.controller.setActiveMotorMoveMode(moveModeStr);
+            this.updateJogButtons();
         end
         function activeMotorComboBoxCallback(this, hObject, hEventData)
+            activeMotorStr = this.activeMotorComboBox.getSelectedItem();
+            this.controller.setActiveMotor(activeMotorStr);
+            this.updateJogButtons();
         end
+        
+        function updateJogButtons(this)
+           numAxis = this.controller.getAvailableJogAxis();
+           buttonStates = [false,false,false,false];
+           if (strcmp(this.moveModeComboBox.getSelectedItem(), 'Relative'))
+               switch numAxis
+                    case 1 
+                        buttonStates = [false, false, true, true];
+                    case 2
+                        buttonStates = [true, true, true, true];
+                   otherwise
+                       %remain all false
+               end
+           else %Absolute move mode
+               switch numAxis
+                    case 1 
+                        buttonStates = [false, false, true, false];
+                    case 2
+                        buttonStates = [true, false, true, false];
+                   otherwise
+                       %remain all false
+               end
+           end
+               
+           this.jogXPosButton.setEnabled(buttonStates(1));
+           this.jogXNegButton.setEnabled(buttonStates(2));
+           this.jogYPosButton.setEnabled(buttonStates(3));
+           this.jogYNegButton.setEnabled(buttonStates(4));
+        end
+        %!!! (A) Edit from A to B
         function jogXNegButtonCallback(this, hObject, hEventData)
+            this.controller.setActiveAxis(2);
+            this.controller.moveActiveMotor(-this.jogDistance);
         end
         function jogXPosButtonCallback(this, hObject, hEventData)
+            this.controller.setActiveAxis(2);
+            this.controller.moveActiveMotor(this.jogDistance);
         end
         function jogYNegButtonCallback(this, hObject, hEventData)
+            this.controller.setActiveAxis(3);
+            this.controller.moveActiveMotor(-this.jogDistance);
         end
         function jogYPosButtonCallback(this, hObject, hEventData)
+            this.controller.setActiveAxis(3);
+            this.controller.moveActiveMotor(this.jogDistance);
         end
-        %!!! (B) Edit done
+        %!!! Need a way to select 
         function jogButtonCallback(this, hObject, hEventData) %!!! edit this----
             if (this.controller.getMotorsEnabled())
-                distanceStr = this.naDistanceTextField.getText();
-                distance = str2num(distanceStr);
                 this.controller.moveManualNA(distance);
             end
         end
@@ -182,14 +226,11 @@ classdef MainView < handle
     
     methods
         function handlePropEvents(this,src,evnt)
-            %evntobj = evnt.AffectedObject;
-            %switch src.Name
-            %    case 'piezoPosition'
-                    NAPos = this.model.NAPosition;
-                    piezoPos = this.model.piezoPosition;
-                    str = strcat(strcat('NA = ', num2str(NAPos)), strcat(' PI = ', num2str(piezoPos)));
+            displacements = this.controller.getDisplacements();
+                    str = strcat(strcat('NA = ', num2str(displacements(1))),...
+                                 strcat(' PI = ', num2str(displacements(2))),...
+                                 strcat(' NP = ', num2str(displacements(3))));
                     this.currentPositionTextArea.setText(str);
-            %end
         end
     end
 end

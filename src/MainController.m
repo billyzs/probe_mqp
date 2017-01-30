@@ -60,11 +60,28 @@ classdef MainController < handle
             enabled = this.model.motorsEnabled;
         end
         
-        function moveManualNA(this, distance)
-            this.model.moveManualNA(distance);
+        function moveActiveMotor(this, displacement)
+            this.model.moveActiveMotor(displacement);
         end
-        function moveManualPiezo(this, distance)
-            this.model.moveManualPiezo(distance);
+        
+        function setActiveMotorMoveMode(this, moveMode)
+            this.model.setActiveMotorMoveMode(moveMode);
+        end
+        
+        function numAxis = getAvailableJogAxis(this)
+            numAxis = this.model.getAvailableJogAxis();
+        end
+        
+        function setActiveMotor(this, motorStr)
+            this.model.setActiveMotor(motorStr);
+        end
+        
+        function setActiveAxis(this, axis)
+            this.model.setActiveAxis(axis);
+        end
+        
+        function displacements = getDisplacements(this)
+            displacements = this.model.getDisplacements();
         end
         
     end

@@ -16,6 +16,7 @@ classdef APTDriver < MotorDriver
         displacement = 0;
         velocity = 1;
         acceleration = 1;
+        moveMode = 'Relative';
         
         % Handle to a strain guage that can be used for displacement
         hStrainGuage;
@@ -27,7 +28,7 @@ classdef APTDriver < MotorDriver
         gui = figure('Position', [488 342 650 840],...
            'Menu','None',...
            'Name','APT GUI');
-       % Hangle to the active x control object of the peizo
+       % Handle to the active x control object of the peizo
         hPiezo;
     end
     
@@ -66,7 +67,7 @@ classdef APTDriver < MotorDriver
         
         % Function to execute a move of the given displacement
         function success = doMove(this, displacement)
-            switch moveMode
+            switch this.moveMode
                 case 'Absolute'
                     %Keep the input displacement
                 case 'Relative'

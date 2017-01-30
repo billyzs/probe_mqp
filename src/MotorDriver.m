@@ -19,6 +19,11 @@ classdef (Abstract) MotorDriver < Equipment
         moveMode;
     end
     
+    properties (Access=protected)
+        % A list of movement history
+        moves = [];
+    end
+    
     methods (Access=public, Abstract)
         % Constructors and destructors should be defined in subclasses
         
@@ -60,14 +65,14 @@ classdef (Abstract) MotorDriver < Equipment
             %Check if the target is valid
             switch this.moveMode
                 case 'Absolute'
-                    valid = isPositionValid(this.displacement);
+                    valid = this.isPositionValid(this.displacement);
                 case 'Relative'
-                    valid = isPositionValid(this.displacement + displacement);
+                    valid = this.isPositionValid(this.displacement + displacement);
                 otherwise
                     warning('Unexpected move mode requested')
                     valid = 0;
             end
-            if (~isVelocityValid(this.velocity) || ~isAccelerationValid(this.acceleration))
+            if (~this.isVelocityValid(this.velocity) || ~this.isAccelerationValid(this.acceleration))
                 warning('Move requested without valid accerlation or velocity')
                 valid = 0;
             end
@@ -108,7 +113,7 @@ classdef (Abstract) MotorDriver < Equipment
                                        displacement,... 
                                        this.velocity,... 
                                        this.acceleration; this.moves]; %LIFO
-                        updateDisplacement(displacement);
+                        this.updateDisplacement(displacement);
                     end
                     return
                 end
