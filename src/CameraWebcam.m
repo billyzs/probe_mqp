@@ -12,7 +12,7 @@ classdef CameraWebcam < CameraDriver
             if nargin ==  0
                 seq = 1;
             end
-            obj@CameraDriver('winvideo', seq, format);
+            obj@CameraDriver('winvideo', seq);
         end      
     end
 end
