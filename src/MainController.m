@@ -35,13 +35,13 @@ classdef MainController < handle
                 case 'gentl'
                     this.model.setCamera(CameraPike(1));
                     %this.model.setCamera(CameraPike(1));
-                viewHandle = this.view;
-                camera = this.model.getCamera();
-                camera.setVideoParameter('FramesPerTrigger', 1);
-                camera.setVideoParameter('TriggerFcn', @viewHandle.previewFrameCallback);
-                camera.setVideoParameter('TriggerRepeat', Inf);
-                camera.setVideoParameter('TriggerFrameDelay', .03);
             end
+            viewHandle = this.view;
+            camera = this.model.getCamera();
+            camera.setVideoParameter('FramesPerTrigger', 1);
+            camera.setVideoParameter('TriggerFcn', @viewHandle.previewFrameCallback);
+            camera.setVideoParameter('TriggerRepeat', Inf);
+            camera.setVideoParameter('TriggerFrameDelay', .03);
         end
         
         function captureImage(this, path)

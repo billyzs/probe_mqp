@@ -24,6 +24,8 @@ classdef MainView < handle
         jogYNegButton;
         jogYPosButton;
         jogDistance = 0;
+        videoWriter;
+        recordingVideo = false;
     end
     
     methods
@@ -95,7 +97,7 @@ classdef MainView < handle
         % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
             if (isempty(this.controller.getCamera()))
-                this.controller.initializeCamera('gentl');
+                this.controller.initializeCamera('webcam');
             end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
@@ -112,6 +114,9 @@ classdef MainView < handle
             im = getdata(obj);
             imJava = im2java(im);
             this.jFrame.setVideoImage(imJava);
+            if (this.recordingVideo == true)
+                writeVideo(this.videoWriter, im);
+            end
         end
         function captureImageButtonCallback(this, hObject, hEventData)
             if(this.controller.cameraIsActive())
@@ -121,6 +126,21 @@ classdef MainView < handle
             end
         end
         function captureVideoButtonCallback(this, hObject, hEventData)
+            if(this.controller.cameraIsActive() && this.recordingVideo == false)
+                [FileName,PathName] = uiputfile();
+                if (~isempty(FileName) && ~isempty(PathName))
+                    this.captureVideoButton.setText('Stop Recording');
+                    this.videoWriter = VideoWriter(strcat(PathName, FileName));
+                    open(this.videoWriter)
+                    this.recordingVideo = true;
+                end   
+            elseif(this.recordingVideo == true)
+                this.captureVideoButton.setText('Capture Video');
+                % Close the file.
+                close(this.videoWriter)
+                this.recordingVideo = false;
+            end
+            
         end
         function positionTextFieldCallback(this, hObject, hEventData)
             this.jogDistance = str2num(this.positionTextField.getText());

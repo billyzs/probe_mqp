@@ -12,9 +12,10 @@ classdef (Abstract) CameraDriver < Equipment
         % driverName is the adapter name given by >> imaqhwinfo, 
         % usually 'gentl'. Sequence is usually 1
         function obj = CameraDriver(driverName, sequence, format)
-            obj.videoObj = videoinput(driverName, sequence);
             if nargin > 2
-                obj.set('VideoFormat', format);
+                obj.videoObj = videoinput(driverName, sequence, format);
+            else
+                obj.videoObj = videoinput(driverName, sequence);
             end
         end
         
