@@ -97,7 +97,7 @@ classdef MainView < handle
         % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
             if (isempty(this.controller.getCamera()))
-                this.controller.initializeCamera('webcam');
+                this.controller.initializeCamera('gentl');
             end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
