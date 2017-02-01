@@ -13,7 +13,6 @@ classdef MainView < handle
     	probeButton;
     	returnButton;
     	saveDataButton;
-    	jogButton;
         positionTextField;
     	targetPositionTextField;
         motorsEnableButton;
@@ -24,8 +23,17 @@ classdef MainView < handle
         jogYNegButton;
         jogYPosButton;
         jogDistance = 0;
+        cameraLabel;
+        probeROIButton;
+        %handles
         videoWriter;
+        %states
         recordingVideo = false;
+        updatingProbeROI = false;
+        probeROI = [0,0,1000,1000] %!!! This should be updated based on camera width
+        hasClickedOnImage = false;
+        overlayShapes = [];
+        roiShapeIndex = 0;
     end
     
     methods
@@ -56,7 +64,6 @@ classdef MainView < handle
             this.probeButton             = handle(this.jFrame.getProbeButton(),             'CallbackProperties');
             this.returnButton            = handle(this.jFrame.getReturnButton(),            'CallbackProperties');
             this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
-            this.jogButton               = handle(this.jFrame.getJogButton(),               'CallbackProperties');
             this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
             this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties'); 
             this.moveModeComboBox        = handle(this.jFrame.getMoveModeComboBox(),        'CallbackProperties');
@@ -65,7 +72,8 @@ classdef MainView < handle
             this.jogXPosButton           = handle(this.jFrame.getJogXPosButton(),           'CallbackProperties');
             this.jogYNegButton           = handle(this.jFrame.getJogYNegButton(),           'CallbackProperties');
             this.jogYPosButton           = handle(this.jFrame.getJogYPosButton(),           'CallbackProperties');
-            
+            this.cameraLabel             = handle(this.jFrame.getCameraLabel(),             'CallbackProperties');
+            this.probeROIButton          = handle(this.jFrame.getProbeROIButton(),          'CallbackProperties');
             % Set Java object callbacks
             set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
             set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
@@ -75,7 +83,6 @@ classdef MainView < handle
             set(this.probeButton,             'ActionPerformedCallback', @this.probeButtonCallback);
             set(this.returnButton,            'ActionPerformedCallback', @this.returnButtonCallback);
             set(this.saveDataButton,          'ActionPerformedCallback', @this.saveDataButtonCallback);
-            set(this.jogButton,               'ActionPerformedCallback', @this.jogButtonCallback);
             set(this.targetPositionTextField, 'ActionPerformedCallback', @this.targetPositionTextFieldCallback);
             set(this.motorsEnableButton,      'ActionPerformedCallback', @this.motorsEnableButtonCallback);
             set(this.moveModeComboBox,        'ActionPerformedCallback', @this.moveModeComboBoxCallback);
@@ -84,8 +91,8 @@ classdef MainView < handle
             set(this.jogXPosButton,           'ActionPerformedCallback', @this.jogXPosButtonCallback);
             set(this.jogYNegButton,           'ActionPerformedCallback', @this.jogYNegButtonCallback);
             set(this.jogYPosButton,           'ActionPerformedCallback', @this.jogYPosButtonCallback);
-            
-           
+            set(this.cameraLabel,             'MouseClickedCallback',    @this.cameraLabelCallback);
+            set(this.probeROIButton,          'MouseClickedCallback',    @this.probeROIButtonCallback);
             
             % Display the Java window
             this.jFrame.setVisible(true);
@@ -109,10 +116,20 @@ classdef MainView < handle
                 this.controller.setCameraActive(false);
             end
         end
+        
+        function image = applyDrawingOverlays(this, image)
+            for shape = this.overlayShapes;
+                image = insertShape(image,shape.type,shape.dimensions,...
+                    'LineWidth',shape.lineWidth,'Opacity',shape.opacity,...
+                    'Color', shape.color);
+            end
+        end
+        
         function previewFrameCallback(this, obj, event)
             flushdata(obj);
             im = getdata(obj);
-            imJava = im2java(im);
+            imOverlayed = this.applyDrawingOverlays(im);
+            imJava = im2java(imOverlayed);
             this.jFrame.setVideoImage(imJava);
             if (this.recordingVideo == true)
                 writeVideo(this.videoWriter, im);
@@ -234,7 +251,44 @@ classdef MainView < handle
                 this.motorsEnableButton.setText('Motors Enabled');
             end
         end
-        
+        function cameraLabelCallback(this, hObject, hEventData)
+            if (this.updatingProbeROI && ~this.hasClickedOnImage)
+                this.probeROI(1) = hEventData.getX();
+                this.probeROI(2) = hEventData.getY();
+                this.hasClickedOnImage = true;
+            elseif (this.updatingProbeROI && this.hasClickedOnImage)
+                this.probeROI(3) = hEventData.getX();
+                this.probeROI(4) = hEventData.getY();
+                %Draw rectangle
+                p1 = [this.probeROI(1) this.probeROI(2)];
+                p2 = [this.probeROI(3) this.probeROI(2)];
+                p3 = [this.probeROI(3) this.probeROI(4)];
+                p4 = [this.probeROI(1) this.probeROI(4)];
+                roiShape = Shape('Polygon', [p1 p2 p3 p4], 5, 'green', 1);
+                overlayListSize = size(this.overlayShapes);
+                if (this.roiShapeIndex < 1 || this.roiShapeIndex > overlayListSize(2))
+                    this.overlayShapes = [this.overlayShapes roiShape];
+                    this.roiShapeIndex = overlayListSize(2) + 1 ;
+                else
+                    this.overlayShapes(this.roiShapeIndex) = roiShape;
+                end
+                
+                this.hasClickedOnImage = false;
+            else
+                this.updatingProbeROI = false;
+                this.hasClickedOnImage = false;
+            end
+            this.probeROI
+        end
+        function probeROIButtonCallback(this, hObject, hEventData)
+            if (this.updatingProbeROI)
+                this.updatingProbeROI = false;
+                this.probeROIButton.setText('Set Probe ROI');
+            else
+                this.updatingProbeROI = true;
+                this.probeROIButton.setText('Save ROI');
+            end
+        end
         %destructor
          function delete(this)
             if (this.controller.cameraIsActive())
