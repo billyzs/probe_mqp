@@ -84,6 +84,17 @@ classdef MainController < handle
             displacements = this.model.getDisplacements();
         end
         
+        function setTemplate(this, roi)
+            this.model.setTemplate(roi);
+        end
+        
+        function identifyHomePoint(this)
+            this.model.identifyHomePoint();
+        end
+        
+        function homepoint = getHomePoint(this)
+            homepoint = this.model.getHomePoint();
+        end
     end
     
 end

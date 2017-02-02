@@ -12,6 +12,9 @@ classdef MainModel < handle
         newportDriver;
         camera;
         videoTimer;
+        %Data
+        template;
+        homePoint = [0,0];
         
     end
         
@@ -113,6 +116,21 @@ classdef MainModel < handle
                 im = this.camera.getImageData();
                 imwrite(im, path);
             end
+        end
+        
+        function setTemplate(this, roi)
+            im = this.camera.getImageData();
+            this.template = im(roi(1):roi(3), roi(2):roi(4));
+        end
+        
+        function identifyHomePoint(this)
+            img = this.camera.getImageData();
+            [i_ssd, i_ncc] = template_matching(this.template, img);
+            [this.homePoint(1), this.homePoint(2)] = find(i_ssd == max(i_ssd(:)));
+        end
+        
+        function homePoint = getHomePoint(this)
+            homePoint = this.homePoint;
         end
     end
 end

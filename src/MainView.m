@@ -165,6 +165,11 @@ classdef MainView < handle
         function positionButtonCallback(this, hObject, hEventData)
         end
         function probeButtonCallback(this, hObject, hEventData)
+            this.controller.setTemplate(this.probeROI);
+            this.controller.identifyHomePoint();
+            homePoint = this.controller.getHomePoint();
+            roiShape = Shape('Circle', [homePoint(1) homePoint(2) 3], 1, 'green', 1);
+            this.overlayShapes = [this.overlayShapes roiShape];
         end
         function returnButtonCallback(this, hObject, hEventData)
         end
