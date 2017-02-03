@@ -95,6 +95,18 @@ classdef MainController < handle
         function homepoint = getHomePoint(this)
             homepoint = this.model.getHomePoint();
         end
+        
+        function setROI(this, type, roi)
+            this.model.setROI(type, roi);
+        end
+        
+        function roiTypes = getAvailableROIs(this)
+            roiTypes = this.model.getAvailableROIs();
+        end
+        
+        function roi = getROI(this, type)
+            roi = this.model.getROI(type);
+        end
     end
     
 end

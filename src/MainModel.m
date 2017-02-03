@@ -15,6 +15,7 @@ classdef MainModel < handle
         %Data
         template;
         homePoint = [0,0];
+        roiDictionary;
         
     end
         
@@ -26,6 +27,27 @@ classdef MainModel < handle
             this.newportDriver = newportDriver;
             this.activeMotor = this.newportDriver;
             this.motorsEnabled = true;
+            %Define unsed ROI types
+            keySet =   {'Probe', 'Template', 'Image'};
+            defaultROI =[1 1 1000 1000]; %If possible this should be based on camera width
+            valueSet = {defaultROI, defaultROI, defaultROI};
+            size(valueSet);
+            this.roiDictionary = containers.Map(keySet, valueSet);
+        end
+        
+        function setROI(this, type, roi)
+            if (~isequal(size(roi), [1 4]))
+                warning('Chosen ROI is not a 1x4 matrix');
+            end
+            this.roiDictionary(type) = roi;
+        end
+        
+        function roiTypes = getAvailableROIs(this)
+            roiTypes = keys(this.roiDictionary);
+        end
+        
+        function roi = getROI(this, type)
+            roi = this.roiDictionary(type);
         end
         
         function enableMotors(this)
@@ -89,7 +111,8 @@ classdef MainModel < handle
         end
         
         function displacements = getDisplacements(this)
-%             displacements = [this.mvpDriver.getDisplacement(),...
+% I can't remember what this was for but it is not done
+%!!!            displacements = [this.mvpDriver.getDisplacement(),...
 %                              this.aptDriver.getDisplacement(),...
 %                              this.newportDriver.getDisplacement()];
             displacements = [0,...

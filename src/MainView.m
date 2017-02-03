@@ -24,13 +24,13 @@ classdef MainView < handle
         jogYPosButton;
         jogDistance = 0;
         cameraLabel;
-        probeROIButton;
+        roiButton;
+        roiTypeComboBox;
         %handles
         videoWriter;
         %states
         recordingVideo = false;
         updatingProbeROI = false;
-        probeROI = [0,0,1000,1000] %!!! This should be updated based on camera width
         hasClickedOnImage = false;
         overlayShapes = [];
         roiShapeIndex = 0;
@@ -73,7 +73,8 @@ classdef MainView < handle
             this.jogYNegButton           = handle(this.jFrame.getJogYNegButton(),           'CallbackProperties');
             this.jogYPosButton           = handle(this.jFrame.getJogYPosButton(),           'CallbackProperties');
             this.cameraLabel             = handle(this.jFrame.getCameraLabel(),             'CallbackProperties');
-            this.probeROIButton          = handle(this.jFrame.getProbeROIButton(),          'CallbackProperties');
+            this.roiButton               = handle(this.jFrame.getROIButton(),               'CallbackProperties');
+            this.roiTypeComboBox         = handle(this.jFrame.getROITypeComboBox(),         'CallbackProperties');
             % Set Java object callbacks
             set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
             set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
@@ -92,7 +93,10 @@ classdef MainView < handle
             set(this.jogYNegButton,           'ActionPerformedCallback', @this.jogYNegButtonCallback);
             set(this.jogYPosButton,           'ActionPerformedCallback', @this.jogYPosButtonCallback);
             set(this.cameraLabel,             'MouseClickedCallback',    @this.cameraLabelCallback);
-            set(this.probeROIButton,          'MouseClickedCallback',    @this.probeROIButtonCallback);
+            set(this.roiButton,               'ActionPerformedCallback', @this.roiButtonCallback);
+            set(this.roiTypeComboBox,         'ActionPerformedCallback', @this.roiTypeComboBoxCallback);
+            
+            initComboBoxes(this);
             
             % Display the Java window
             this.jFrame.setVisible(true);
@@ -101,10 +105,21 @@ classdef MainView < handle
                 waitfor(this.jFrame);
             end
         end
+        
+        function initComboBoxes(this)
+            %The moveMode and ActiveMotor boxes are currently in Java. Move
+            %when available
+            this.roiTypeComboBox.removeAllItems();
+            roiTypes = this.controller.getAvailableROIs();
+            for roiType = roiTypes
+                this.roiTypeComboBox.addItem(java.lang.String(roiType));
+            end
+        end
+        
         % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
             if (isempty(this.controller.getCamera()))
-                this.controller.initializeCamera('gentl');
+                this.controller.initializeCamera('webcam');
             end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
@@ -165,7 +180,8 @@ classdef MainView < handle
         function positionButtonCallback(this, hObject, hEventData)
         end
         function probeButtonCallback(this, hObject, hEventData)
-            this.controller.setTemplate(this.probeROI);
+            this.controller.getROI('Probe')
+            this.controller.setTemplate(this.controller.getROI('Probe'));
             this.controller.identifyHomePoint();
             homePoint = this.controller.getHomePoint();
             roiShape = Shape('Circle', [homePoint(1) homePoint(2) 3], 1, 'green', 1);
@@ -257,18 +273,24 @@ classdef MainView < handle
             end
         end
         function cameraLabelCallback(this, hObject, hEventData)
+            roiType = this.roiTypeComboBox.getSelectedItem();
+            roi = this.controller.getROI(roiType);
+            roi
             if (this.updatingProbeROI && ~this.hasClickedOnImage)
-                this.probeROI(1) = hEventData.getX();
-                this.probeROI(2) = hEventData.getY();
+                roi(1) = hEventData.getX();
+                roi(2) = hEventData.getY();
+                this.controller.setROI(roiType, roi);
                 this.hasClickedOnImage = true;
+                this.roiButton.setEnabled(false);
             elseif (this.updatingProbeROI && this.hasClickedOnImage)
-                this.probeROI(3) = hEventData.getX();
-                this.probeROI(4) = hEventData.getY();
+                roi(3) = hEventData.getX();
+                roi(4) = hEventData.getY();
+                this.controller.setROI(roiType, roi);
                 %Draw rectangle
-                p1 = [this.probeROI(1) this.probeROI(2)];
-                p2 = [this.probeROI(3) this.probeROI(2)];
-                p3 = [this.probeROI(3) this.probeROI(4)];
-                p4 = [this.probeROI(1) this.probeROI(4)];
+                p1 = [roi(1) roi(2)];
+                p2 = [roi(3) roi(2)];
+                p3 = [roi(3) roi(4)];
+                p4 = [roi(1) roi(4)];
                 roiShape = Shape('Polygon', [p1 p2 p3 p4], 5, 'green', 1);
                 overlayListSize = size(this.overlayShapes);
                 if (this.roiShapeIndex < 1 || this.roiShapeIndex > overlayListSize(2))
@@ -279,21 +301,31 @@ classdef MainView < handle
                 end
                 
                 this.hasClickedOnImage = false;
+                this.roiButton.setEnabled(true);
             else
                 this.updatingProbeROI = false;
                 this.hasClickedOnImage = false;
+                this.roiButton.setEnabled(true);
             end
-            this.probeROI
         end
-        function probeROIButtonCallback(this, hObject, hEventData)
+        
+        function roiButtonCallback(this, hObject, hEventData)
             if (this.updatingProbeROI)
                 this.updatingProbeROI = false;
-                this.probeROIButton.setText('Set Probe ROI');
+                this.roiButton.setText('Set ROI');
+                %!!! remove
+                roiType = this.roiTypeComboBox.getSelectedItem();
+                roi = this.controller.getROI(roiType)
             else
                 this.updatingProbeROI = true;
-                this.probeROIButton.setText('Save ROI');
+                this.roiButton.setText('Save ROI');
             end
         end
+        
+        function roiTypeComboBoxCallback(this, hObject, hEventData)
+        end
+        
+        
         %destructor
          function delete(this)
             if (this.controller.cameraIsActive())
