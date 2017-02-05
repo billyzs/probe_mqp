@@ -143,13 +143,15 @@ classdef MainModel < handle
         
         function setTemplate(this, roi)
             im = this.camera.getImageData();
-            this.template = im(roi(1):roi(3), roi(2):roi(4));
+            this.template = im(roi(2):roi(4), roi(1):roi(3));%imcrop(im,[roi(1) roi(2) roi(3)-roi(1) roi(4)-roi(2)]);          
+            imshow(this.template);
         end
         
         function identifyHomePoint(this)
             img = this.camera.getImageData();
             [i_ssd, i_ncc] = template_matching(this.template, img);
-            [this.homePoint(1), this.homePoint(2)] = find(i_ssd == max(i_ssd(:)));
+            %XY values are flipped
+            [this.homePoint(2), this.homePoint(1)] = find(i_ssd == max(i_ssd(:)));
         end
         
         function homePoint = getHomePoint(this)

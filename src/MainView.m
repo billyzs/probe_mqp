@@ -119,7 +119,7 @@ classdef MainView < handle
         % GUI Action Performed Callback Functions
         function startCameraButtonCallback(this, hObject, hEventData)
             if (isempty(this.controller.getCamera()))
-                this.controller.initializeCamera('webcam');
+                this.controller.initializeCamera('gentl');
             end
             if (this.controller.cameraIsActive() == false)
                 this.startCameraButton.setText('Stop');
@@ -141,14 +141,16 @@ classdef MainView < handle
         end
         
         function previewFrameCallback(this, obj, event)
-            flushdata(obj);
-            im = getdata(obj);
-            imOverlayed = this.applyDrawingOverlays(im);
-            imJava = im2java(imOverlayed);
-            this.jFrame.setVideoImage(imJava);
-            if (this.recordingVideo == true)
-                writeVideo(this.videoWriter, im);
+            if (obj.FramesAvailable > 0)
+                im = peekdata(obj,1);
+                imOverlayed = this.applyDrawingOverlays(im);
+                imJava = im2java(imOverlayed);
+                this.jFrame.setVideoImage(imJava);
+                if (this.recordingVideo == true)
+                    writeVideo(this.videoWriter, im);
+                end
             end
+            flushdata(obj);
         end
         function captureImageButtonCallback(this, hObject, hEventData)
             if(this.controller.cameraIsActive())
@@ -180,9 +182,12 @@ classdef MainView < handle
         function positionButtonCallback(this, hObject, hEventData)
         end
         function probeButtonCallback(this, hObject, hEventData)
-            this.controller.getROI('Probe')
-            this.controller.setTemplate(this.controller.getROI('Probe'));
+            this.controller.getROI('Template')
+            this.controller.setTemplate(this.controller.getROI('Template'));
+            this.controller.setCameraActive(false);
             this.controller.identifyHomePoint();
+            this.controller.setCameraActive(true);
+
             homePoint = this.controller.getHomePoint();
             roiShape = Shape('Circle', [homePoint(1) homePoint(2) 3], 1, 'green', 1);
             this.overlayShapes = [this.overlayShapes roiShape];
@@ -275,7 +280,6 @@ classdef MainView < handle
         function cameraLabelCallback(this, hObject, hEventData)
             roiType = this.roiTypeComboBox.getSelectedItem();
             roi = this.controller.getROI(roiType);
-            roi
             if (this.updatingProbeROI && ~this.hasClickedOnImage)
                 roi(1) = hEventData.getX();
                 roi(2) = hEventData.getY();
@@ -286,19 +290,19 @@ classdef MainView < handle
                 roi(3) = hEventData.getX();
                 roi(4) = hEventData.getY();
                 this.controller.setROI(roiType, roi);
-                %Draw rectangle
-                p1 = [roi(1) roi(2)];
-                p2 = [roi(3) roi(2)];
-                p3 = [roi(3) roi(4)];
-                p4 = [roi(1) roi(4)];
-                roiShape = Shape('Polygon', [p1 p2 p3 p4], 5, 'green', 1);
-                overlayListSize = size(this.overlayShapes);
-                if (this.roiShapeIndex < 1 || this.roiShapeIndex > overlayListSize(2))
-                    this.overlayShapes = [this.overlayShapes roiShape];
-                    this.roiShapeIndex = overlayListSize(2) + 1 ;
-                else
-                    this.overlayShapes(this.roiShapeIndex) = roiShape;
-                end
+%                 %Draw rectangle
+%                 p1 = [roi(1) roi(2)];
+%                 p2 = [roi(3) roi(2)];
+%                 p3 = [roi(3) roi(4)];
+%                 p4 = [roi(1) roi(4)];
+%                 roiShape = Shape('Polygon', [p1 p2 p3 p4], 5, 'green', 1);
+%                 overlayListSize = size(this.overlayShapes);
+%                 if (this.roiShapeIndex < 1 || this.roiShapeIndex > overlayListSize(2))
+%                     this.overlayShapes = [this.overlayShapes roiShape];
+%                     this.roiShapeIndex = overlayListSize(2) + 1 ;
+%                 else
+%                     this.overlayShapes(this.roiShapeIndex) = roiShape;
+%                 end
                 
                 this.hasClickedOnImage = false;
                 this.roiButton.setEnabled(true);
@@ -313,9 +317,6 @@ classdef MainView < handle
             if (this.updatingProbeROI)
                 this.updatingProbeROI = false;
                 this.roiButton.setText('Set ROI');
-                %!!! remove
-                roiType = this.roiTypeComboBox.getSelectedItem();
-                roi = this.controller.getROI(roiType)
             else
                 this.updatingProbeROI = true;
                 this.roiButton.setText('Save ROI');

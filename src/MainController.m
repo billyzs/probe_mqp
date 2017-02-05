@@ -41,7 +41,7 @@ classdef MainController < handle
             camera.setVideoParameter('FramesPerTrigger', 1);
             camera.setVideoParameter('TriggerFcn', @viewHandle.previewFrameCallback);
             camera.setVideoParameter('TriggerRepeat', Inf);
-            camera.setVideoParameter('TriggerFrameDelay', .03);
+            %camera.setVideoParameter('TriggerFrameDelay', .04);
         end
         
         function captureImage(this, path)
