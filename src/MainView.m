@@ -34,6 +34,9 @@ classdef MainView < handle
         hasClickedOnImage = false;
         overlayShapes = [];
         roiShapeIndex = 0;
+        %data
+        activeImage = uint8(zeros(1000,1000));
+        displayImage = zeros(1000,1000,3);
     end
     
     methods
@@ -50,7 +53,7 @@ classdef MainView < handle
         
         function launchView(this)
             % Add Java library to dynamic Java classpath
-            javaaddpath([pwd '\Probe_MQP_Java_GUI.jar']);
+            javaaddpath([pwd '\lib\Probe_MQP_Java_GUI.jar']);
             % Get example Java window from the library
             this.jFrame = probe_mqp_java_gui.MainUIJFrame();
             % Get Java buttons
@@ -132,25 +135,29 @@ classdef MainView < handle
             end
         end
         
-        function image = applyDrawingOverlays(this, image)
+        function applyDrawingOverlays(this)
             for shape = this.overlayShapes;
-                image = insertShape(image,shape.type,shape.dimensions,...
+                this.displayImage = insertShape(this.activeImage,shape.type,shape.dimensions,...
                     'LineWidth',shape.lineWidth,'Opacity',shape.opacity,...
                     'Color', shape.color);
+            end
+            if (isempty(this.overlayShapes))
+                this.displayImage = this.activeImage;
             end
         end
         
         function previewFrameCallback(this, obj, event)
+            %tic;
             if (obj.FramesAvailable > 0)
-                im = peekdata(obj,1);
-                imOverlayed = this.applyDrawingOverlays(im);
-                imJava = im2java(imOverlayed);
-                this.jFrame.setVideoImage(imJava);
+                this.activeImage = peekdata(obj,1);
+                this.applyDrawingOverlays();
+                this.jFrame.setVideoImage(im2java(this.displayImage));
                 if (this.recordingVideo == true)
-                    writeVideo(this.videoWriter, im);
+                    writeVideo(this.videoWriter, this.activeImage);
                 end
             end
             flushdata(obj);
+            %toc;
         end
         function captureImageButtonCallback(this, hObject, hEventData)
             if(this.controller.cameraIsActive())
@@ -180,6 +187,7 @@ classdef MainView < handle
             this.jogDistance = str2num(this.positionTextField.getText());
         end
         function positionButtonCallback(this, hObject, hEventData)
+            preview(this.controller.getCamera().getVideoInput());
         end
         function probeButtonCallback(this, hObject, hEventData)
             this.controller.getROI('Template')

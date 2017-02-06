@@ -15,8 +15,7 @@ classdef MainModel < handle
         %Data
         template;
         homePoint = [0,0];
-        roiDictionary;
-        
+        roiDictionary;     
     end
         
     methods
@@ -31,7 +30,6 @@ classdef MainModel < handle
             keySet =   {'Probe', 'Template', 'Image'};
             defaultROI =[1 1 1000 1000]; %If possible this should be based on camera width
             valueSet = {defaultROI, defaultROI, defaultROI};
-            size(valueSet);
             this.roiDictionary = containers.Map(keySet, valueSet);
         end
         
@@ -144,18 +142,27 @@ classdef MainModel < handle
         function setTemplate(this, roi)
             im = this.camera.getImageData();
             this.template = im(roi(2):roi(4), roi(1):roi(3));%imcrop(im,[roi(1) roi(2) roi(3)-roi(1) roi(4)-roi(2)]);          
-            imshow(this.template);
         end
         
         function identifyHomePoint(this)
             img = this.camera.getImageData();
-            [i_ssd, i_ncc] = template_matching(this.template, img);
-            %XY values are flipped
-            [this.homePoint(2), this.homePoint(1)] = find(i_ssd == max(i_ssd(:)));
+            %% Compute
+            % Invoke mex function to search for matches between an image patch and an
+            % input image.
+            result = matchTemplateOCV(this.template, img);
+            % Mark peak location
+            [~, idx] = max(abs(result(:)));
+            [y, x] = ind2sub(size(result),idx(1));
+            templateSize = size(this.template);
+            this.homePoint(1) = x + templateSize(2) /2;
+            this.homePoint(2) = y + templateSize(1) /2;
+            %[this.homePoint(1), this.homePoint(2)] = template_matching(this.template, img);
+           
         end
         
         function homePoint = getHomePoint(this)
             homePoint = this.homePoint;
         end
+        
     end
 end

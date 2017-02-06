@@ -49,6 +49,10 @@ classdef (Abstract) CameraDriver < Equipment
             set(obj.videoObj, key, value);
         end
         
+        function videoInput = getVideoInput(obj)
+            videoInput = obj.videoObj;
+        end
+        
     end
     
     methods (Access=public, Static)
