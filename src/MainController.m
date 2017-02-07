@@ -113,6 +113,10 @@ classdef MainController < handle
             this.model.moveToHomeXY();
         end
         
+        function startProbingSequence(this)
+            this.model.startProbingSequence();
+        end
+        
     end
     
 end

@@ -199,7 +199,7 @@ classdef MainView < handle
             this.controller.moveToHomeXY()
         end
         function probeButtonCallback(this, hObject, hEventData)
-            
+            this.controller.startProbingSequence();
         end
         function returnButtonCallback(this, hObject, hEventData)
         end

@@ -182,5 +182,50 @@ classdef MainModel < handle
         function delta = getDistanceComponentsMM(this, p1, p2)
             delta = -((p2 - p1) * (this.camera.getPixelSize() / 1000));
         end
+        
+        function startProbingSequence(this)
+            if (this.cameraActive == false || isempty(this.camera) || ~this.motorsEnabled)
+                return
+            end
+            
+            this.moveHome('National Aperture');
+            this.moveHome('Piezo');
+            this.setActiveMotor('National Aperture');
+            this.setActiveMotorMoveMode('Relative');
+            stepSize = 500;
+            % Should we also check the probe here?
+            while(varianceOfLaplacian() < threshold)
+                meanForce = this.probe.getMeanForce();
+                if (meanForce >  thresholdForce)
+                    %Stop!!!
+                    return
+                end
+                this.moveActiveMotor(stepSize)
+            end
+            
+        end
+        
+        %Helper function for setting a motor position back to zero
+        function moveHome(this, motorStr)
+            switch motorStr
+                case 'National Aperture' 
+                    this.setActiveMotor('National Aperture');
+                    this.setActiveMotorMoveMode('Absolute');
+                    this.moveActiveMotor(0);
+                case 'Piezo'
+                    this.setActiveMotor('Piezo');
+                    this.setActiveMotorMoveMode('Absolute');
+                    this.moveActiveMotor(0);
+                case 'Newport XY'
+                    this.setActiveMotor('Newport XY');
+                    this.setActiveMotorMoveMode('Absolute');
+                    this.setActiveAxis(2);
+                    this.moveActiveMotor(0);
+                    this.setActiveAxis(3);
+                    this.moveActiveMotor(0);
+                otherwise
+                    warning('Unexpected active motor type. Active motor unchanged.')
+            end
+        end
     end
 end
