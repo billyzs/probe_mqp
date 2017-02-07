@@ -193,14 +193,23 @@ classdef MainModel < handle
             this.setActiveMotor('National Aperture');
             this.setActiveMotorMoveMode('Relative');
             stepSize = 500;
+            variance = 0;
+            done = false;
             % Should we also check the probe here?
-            while(varianceOfLaplacian() < threshold)
+            while(~done)
                 meanForce = this.probe.getMeanForce();
                 if (meanForce >  thresholdForce)
-                    %Stop!!!
                     return
                 end
-                this.moveActiveMotor(stepSize)
+                im = this.camera.getImageData();
+                roi = this.getROI('Probe');
+                probeIm = im(roi(2):roi(4), roi(1):roi(3));
+                variance = VarianceOfLaplacian(probeIm);
+                if (variance > threshold)
+                    done = true;
+                else
+                    this.moveActiveMotor(stepSize)
+                end
             end
             
         end
