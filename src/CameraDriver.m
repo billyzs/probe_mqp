@@ -2,7 +2,7 @@ classdef (Abstract) CameraDriver < Equipment
        
     properties (Access = protected, Abstract)
         magnification; 
-        pixelDensity; % micrometer per pixel
+        pixelSize; % micrometer per pixel
     end
     properties (Access = protected)
         videoObj;
@@ -29,8 +29,8 @@ classdef (Abstract) CameraDriver < Equipment
             obj.magnification = m;
         end
         
-        function setPixelDensity(obj, pd)
-            obj.pixelDensity = pd;
+        function setPixelSize(obj, pd)
+            obj.pixelSize = pd;
         end
         
         function start(obj)
@@ -53,15 +53,12 @@ classdef (Abstract) CameraDriver < Equipment
             videoInput = obj.videoObj;
         end
         
-    end
-    
-    methods (Access=public, Static)
         function m = getMagnification(obj)
             m = obj.magnification;
         end
         
-        function pd = getPixelDensity(obj)
-            pd = obj.pixelDensity;
+        function pd = getPixelSize(obj)
+            pd = obj.pixelSize;
         end
     end
 end

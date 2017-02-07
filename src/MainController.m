@@ -41,6 +41,7 @@ classdef MainController < handle
             camera.setVideoParameter('FramesPerTrigger', 1);
             camera.setVideoParameter('TriggerFcn', @viewHandle.previewFrameCallback);
             camera.setVideoParameter('TriggerRepeat', Inf);
+            camera.setPixelSize(1.6);
             %camera.setVideoParameter('TriggerFrameDelay', .04);
         end
         
@@ -107,6 +108,11 @@ classdef MainController < handle
         function roi = getROI(this, type)
             roi = this.model.getROI(type);
         end
+        
+        function moveToHomeXY(this)
+            this.model.moveToHomeXY();
+        end
+        
     end
     
 end

@@ -187,11 +187,7 @@ classdef MainView < handle
             this.jogDistance = str2num(this.positionTextField.getText());
         end
         function positionButtonCallback(this, hObject, hEventData)
-            preview(this.controller.getCamera().getVideoInput());
-        end
-        function probeButtonCallback(this, hObject, hEventData)
-            this.controller.getROI('Template')
-            this.controller.setTemplate(this.controller.getROI('Template'));
+            % Home point located
             this.controller.setCameraActive(false);
             this.controller.identifyHomePoint();
             this.controller.setCameraActive(true);
@@ -199,6 +195,11 @@ classdef MainView < handle
             homePoint = this.controller.getHomePoint();
             roiShape = Shape('Circle', [homePoint(1) homePoint(2) 3], 1, 'green', 1);
             this.overlayShapes = [this.overlayShapes roiShape];
+            % Move DUT to homepoint
+            this.controller.moveToHomeXY()
+        end
+        function probeButtonCallback(this, hObject, hEventData)
+            
         end
         function returnButtonCallback(this, hObject, hEventData)
         end
@@ -324,6 +325,8 @@ classdef MainView < handle
         function roiButtonCallback(this, hObject, hEventData)
             if (this.updatingProbeROI)
                 this.updatingProbeROI = false;
+                roiType = this.roiTypeComboBox.getSelectedItem();
+                this.controller.setTemplate(this.controller.getROI(roiType));
                 this.roiButton.setText('Set ROI');
             else
                 this.updatingProbeROI = true;

@@ -164,5 +164,23 @@ classdef MainModel < handle
             homePoint = this.homePoint;
         end
         
+        function moveToHomeXY(this)
+            if (this.cameraActive == false || isempty(this.camera))
+                return
+            end
+            % Should be half camera width and resolution
+            delta = this.getDistanceComponentsMM(this.homePoint, [500, 500]);
+            this.setActiveMotor('Newport XY');
+            this.setActiveMotorMoveMode('Relative');
+            this.setActiveAxis(2);
+            this.moveActiveMotor(delta(2));
+            this.setActiveAxis(3);
+            this.moveActiveMotor(delta(1));
+            %Here would be where we check if the movement was successful
+        end
+        
+        function delta = getDistanceComponentsMM(this, p1, p2)
+            delta = -((p2 - p1) * (this.camera.getPixelSize() / 1000));
+        end
     end
 end

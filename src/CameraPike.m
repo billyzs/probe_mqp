@@ -5,7 +5,7 @@ classdef CameraPike < CameraDriver
     end
     properties (Access = protected)
         magnification = 1; 
-        pixelDensity = 0; % micrometer per pixel
+        pixelSize = 0; % micrometer per pixel
     end
     methods (Access = public)
         function obj = CameraPike(seq)
