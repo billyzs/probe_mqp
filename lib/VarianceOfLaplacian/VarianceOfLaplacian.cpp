@@ -59,6 +59,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     cv::pow(stddev, 2, variance);
     // Put the data back into the output MATLAB array
     plhs[0] = ocvMxArrayFromMat_double(variance);
-    plhs[1] = ocvMxArrayFromMat_double(stddev);
-    plhs[2] = ocvMxArrayFromMat_double(mean);
+    //plhs[1] = ocvMxArrayFromMat_double(stddev);
+    //plhs[2] = ocvMxArrayFromMat_double(mean);
 }

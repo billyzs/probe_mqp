@@ -7,7 +7,7 @@ index = 1;
 for file = files'
     im = imread([path file.name]);
     im = im(440:986, 492:668);
-    [var, stddev, mean] = VarianceOfLaplacian(im)
+    var = VarianceOfLaplacian(im);
     data(index, :) = [var str2num(file.name(1:end-4))]; 
     index = index + 1;
 end
