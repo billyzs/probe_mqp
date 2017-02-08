@@ -27,7 +27,7 @@ classdef APTDriver < MotorDriver
         % The figure which will hold the active x control
         gui = figure('Position', [488 342 650 840],...
            'Menu','None',...
-           'Name','APT GUI');
+           'Name','APT GUI', 'Visible','Off');
        % Handle to the active x control object of the peizo
         hPiezo;
     end

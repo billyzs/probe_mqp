@@ -78,7 +78,7 @@ classdef APTStrainGuage < handle
             fpos(3) = 640; % figure window size;Width
             fpos(4) = 480; % Height
             
-            fig = figure('Position', fpos, 'Menu','None','Name','APT GUI');
+            fig = figure('Position', fpos, 'Menu','None','Name','APT GUI', 'Visible','Off');
         end
     end
     

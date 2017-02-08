@@ -154,6 +154,12 @@ classdef (Abstract) MotorDriver < Equipment
             end
             this.moves = newMoves;
         end
+        
+        % Function move the motor to its absolute 0 position
+        function success = moveHome(this)
+            this.setMoveMode('Absolute');
+            success = this.move(0);
+        end
     end
     
     methods (Access=public) % Getters and Setters

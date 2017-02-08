@@ -41,7 +41,6 @@ classdef MainController < handle
             camera.setVideoParameter('FramesPerTrigger', 1);
             camera.setVideoParameter('TriggerFcn', @viewHandle.previewFrameCallback);
             camera.setVideoParameter('TriggerRepeat', Inf);
-            camera.setPixelSize(1.6);
             %camera.setVideoParameter('TriggerFrameDelay', .04);
         end
         
@@ -117,6 +116,13 @@ classdef MainController < handle
             this.model.startProbingSequence();
         end
         
+        function enableProbe(this)
+            this.model.enableProbe();
+        end
+        
+        function disableProbe(this)
+            this.model.disableProbe();
+        end
     end
     
 end

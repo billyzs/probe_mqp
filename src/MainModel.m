@@ -12,20 +12,23 @@ classdef MainModel < handle
         newportDriver;
         camera;
         videoTimer;
+        probe;
         %Data
         template;
         homePoint = [0,0];
-        roiDictionary;     
+        roiDictionary;
+        homeOffset = [0,0];
     end
         
     methods
-        function this = MainModel(mvpDriver, aptDriver, aptStrainGuage, newportDriver)
+        function this = MainModel(mvpDriver, aptDriver, aptStrainGuage, newportDriver, probe)
             this.mvpDriver = mvpDriver;
             this.aptDriver = aptDriver;
             this.aptStrainGuage = aptStrainGuage;
             this.newportDriver = newportDriver;
             this.activeMotor = this.newportDriver;
             this.motorsEnabled = true;
+            this.probe = probe;
             %Define unsed ROI types
             keySet =   {'Probe', 'Template', 'Image'};
             defaultROI =[1 1 1000 1000]; %If possible this should be based on camera width
@@ -46,6 +49,14 @@ classdef MainModel < handle
         
         function roi = getROI(this, type)
             roi = this.roiDictionary(type);
+        end
+        
+        function enableProbe(this)
+            this.probe.connect();
+        end
+        
+        function disableProbe(this)
+            this.probe.disconnect();
         end
         
         function enableMotors(this)
@@ -107,6 +118,13 @@ classdef MainModel < handle
                 otherwise
                     warning('Unexpected active motor type. Num Axis set to 0')
             end
+        end
+        
+        function setHomeOffset(this, offset)
+            if (size(offset) ~= 2)
+                error('setHomeOffset should take in a 2 element matrix of x and y'); 
+            end
+            this.homeOffset = offset;
         end
         
         function displacements = getDisplacements(this)
@@ -177,6 +195,7 @@ classdef MainModel < handle
             this.moveActiveMotor(delta(2));
             this.setActiveAxis(3);
             this.moveActiveMotor(delta(1));
+            this.homeOffset = [delta(1), delta(2)];
             %Here would be where we check if the movement was successful
         end
         
@@ -185,88 +204,139 @@ classdef MainModel < handle
         end
         
         function startProbingSequence(this)
+            %Place multi point code here
+            %loop
+                % probeCurrentPoint
+            % return data
+        end
+        
+        function probeCurrentPoint(this)
             if (~this.cameraActive || isempty(this.camera) || ~this.motorsEnabled)
                 return
             end
-            
-            this.moveHome('National Aperture');
-            this.moveHome('Piezo');
+           
+            % Pre devices
+            this.enableProbe();
+            this.mvpDriver.moveHome();
+            this.aptDriver.moveHome();
             this.setActiveMotor('National Aperture');
             this.setActiveMotorMoveMode('Relative');
-            stepSize = 500;
+            % Set parameters
+            courseStep = 500;
             variance = 0;
-            done = false;
             forceThreshold = 5;
             varianceThreshold = 1000;
             roi = this.getROI('Probe');
             inPiezoRange = false;
-            % Should we also check the probe here?
+            % Get constant data points
+            this.newportDriver.setActiveAxis(3);
+            x = this.newportDriver.getDisplacement() - this.homeOffset(1);
+            this.newportDriver.setActiveAxis(2);
+            y = this.newportDriver.getDisplacement() - this.homeOffset(2);
+            
+            % Create data object
+            data = zeros(100,6); % Sec, uN, x in um, y in um, z course, z fine
+            index = 1;
+            % Start approach timer
+             tic;
             % Course actuation
             while(~inPiezoRange)
+                % Record data
                 meanForce = this.probe.getMeanForce();
+                data(index, :) = ...
+                    [toc, meanForce, x, y,...
+                    this.mvpDriver.getDisplacement(),...
+                    this.aptDriver.getDisplacement()];
+                % Check if contact made early and abort if so
                 if (meanForce >  forceThreshold)
                     return
-                end
-                if (this.activeMotor.getDisplacement() + stepSize > this.activeMotor.getMaxDisplacement())
-                    
-                    return
-                end    
+                end   
+                % Get camera image and calculate variance
                 im = this.camera.getImageData();
                 probeIm = im(roi(2):roi(4), roi(1):roi(3));
                 variance = VarianceOfLaplacian(probeIm);
                 if (variance > varianceThreshold)
                     inPiezoRange = true;
-                    this.setActiveMotor('Piezo');
                 else
-                    %We may want some kind of move completed check here
-                    moveValid = this.moveActiveMotor(stepSize);
+                    % Move course motion
+                    % We may want some kind of move completed check here
+                    moveValid = this.moveActiveMotor(courseStep);
                     if (~moveValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');
-                        this.setActiveMotorMoveMode('Absolute');
-                        this.moveActiveMotor(0);
+                        this.mvpDriver.moveHome();
+                        return;
                     end
                 end
             end
+            % Update parameters
+            fineStep = 1;
+            courseStep = 100;
+            inContact = false;
+            % Prep motors
+            this.setActiveMotor('Piezo');
+            this.setActiveMotorMoveMode('Relative');
             % Final approach
             while(~inContact)
+                % Step fine actuator
+                moveValid = this.moveActiveMotor(fineStep);
+                if (~moveValid)
+                    % Fine actuator cannot make contact use course actuator
+                    warning('Fine actuator cannot make desired move. Using course actuator.');
+                    this.aptDriver.moveHome();
+                    this.setActiveMotor('National Aperture');
+                    stepModeValid = this.moveActiveMotor(courseStep);
+                    if (~stepModeValid)
+                        warning('Course actuator cannot make desired move. No contact made. Returning to home.');
+                        this.mvpDriver.moveHome();
+                        return;
+                    end
+                    this.setActiveMotor('Piezo');
+                    this.setActiveMotorMoveMode('Relative');
+                end
+                % Check if contact made and record data
                 meanForce = this.probe.getMeanForce();
+                data(index, :) = ...
+                    [toc, meanForce, x, y,...
+                    this.mvpDriver.getDisplacement(),...
+                    this.aptDriver.getDisplacement()];
                 if (meanForce >  forceThreshold)
                     inContact = true;
                 end 
-                im = this.camera.getImageData();
-                probeIm = im(roi(2):roi(4), roi(1):roi(3));
-                variance = VarianceOfLaplacian(probeIm);
-                if (variance > varianceThreshold)
-                    inPiezoRange = true;
-                    this.setActiveMotor('Piezo');
-                else
-                    %We may want some kind of move completed check here
-                    this.moveActiveMotor(stepSize);
-                end
             end
+            % Contact Made
+            % Apply force then let settle then retract
+            waitTime = 1;
+            for stepDirection = [1,-1,0]
+                while(tic < waitTime + tic)
+                    meanForce = this.probe.getMeanForce();
+                    data(index, :) = ...
+                        [toc + contactTime, meanForce, x, y,...
+                        this.mvpDriver.getDisplacement(),...
+                        this.aptDriver.getDisplacement()];
+                end
+                this.moveActiveMotor(stepSize * stepDirection);
+            end
+
+            % Retract and complete sample
+            this.mvpDriver.moveHome();
+            this.aptDriver.moveHome();
+            this.disableProbe();
+            % Complete
+            % Do something with data !!!
         end
         
-        %Helper function for setting a motor position back to zero
-        function moveHome(this, motorStr)
-            switch motorStr
-                case 'National Aperture' 
-                    this.setActiveMotor('National Aperture');
-                    this.setActiveMotorMoveMode('Absolute');
-                    this.moveActiveMotor(0);
-                case 'Piezo'
-                    this.setActiveMotor('Piezo');
-                    this.setActiveMotorMoveMode('Absolute');
-                    this.moveActiveMotor(0);
-                case 'Newport XY'
-                    this.setActiveMotor('Newport XY');
-                    this.setActiveMotorMoveMode('Absolute');
-                    this.setActiveAxis(2);
-                    this.moveActiveMotor(0);
-                    this.setActiveAxis(3);
-                    this.moveActiveMotor(0);
-                otherwise
-                    warning('Unexpected active motor type. Active motor unchanged.')
-            end
-        end
+        % TO DO
+        % Done: Add probe object to MainModel and intialize is
+        % Done: Add moveHome method to MotorDriver
+        % Confirm Relative motion on piezo
+        % Confirm getDisplacement on NA and Piezo
+        % Done: Get X and Y location for national aperature stages
+        % Done: Clean up approach function
+        % Split code into functions
+        % Develop testing method that can be done with the needle.
+        % Attach probe and get images of probe over device and on approach
+        % Implement Billy's probe auto detection method in matlab
+        % Develop method for moving to next X,Y probing location
+        
     end
 end
