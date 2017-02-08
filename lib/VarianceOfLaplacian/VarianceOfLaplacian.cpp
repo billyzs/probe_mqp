@@ -49,14 +49,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Convert mxArray inputs into OpenCV types
     cv::Ptr<cv::Mat> imgCV = ocvMxArrayToImage_uint8(prhs[0], true);
     
-    cv::Mat imgLap(imgCV->rows, imgCV->cols, CV_32F);
+    cv::Mat imgLap(imgCV->rows, imgCV->cols, CV_16S);
     
-    cv::Laplacian(*imgCV, imgLap, CV_32F, 3);
-    cv::Mat mean, stddev;
+    cv::Laplacian(*imgCV, imgLap, CV_16S, 1);
+    cv::Mat mean(1,1,CV_64F);
+    cv::Mat stddev(1,1,CV_64F);
     cv::meanStdDev(imgLap, mean, stddev);
-    cv::Mat variance(1,1,CV_32F);
+    cv::Mat variance(1,1,CV_64F);
     cv::pow(stddev, 2, variance);
-    
     // Put the data back into the output MATLAB array
     plhs[0] = ocvMxArrayFromMat_double(variance);
+    //plhs[1] = ocvMxArrayFromMat_double(stddev);
+    //plhs[2] = ocvMxArrayFromMat_double(mean);
 }
