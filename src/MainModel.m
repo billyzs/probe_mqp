@@ -86,9 +86,10 @@ classdef MainModel < handle
             this.activeMotor.setMoveMode(moveMode);
         end
         
-        function moveActiveMotor(this, displacement)
+        function success = moveActiveMotor(this, displacement)
+            success = false;
             if (isnumeric(displacement) && ~isempty(displacement))
-                this.activeMotor.move(displacement);
+                success = this.activeMotor.move(displacement);
                 this.activeMotor.updateDisplacement(displacement);
                 this.displacementUpdated = ~this.displacementUpdated;
             end
@@ -184,7 +185,7 @@ classdef MainModel < handle
         end
         
         function startProbingSequence(this)
-            if (this.cameraActive == false || isempty(this.camera) || ~this.motorsEnabled)
+            if (~this.cameraActive || isempty(this.camera) || ~this.motorsEnabled)
                 return
             end
             
@@ -195,23 +196,54 @@ classdef MainModel < handle
             stepSize = 500;
             variance = 0;
             done = false;
+            forceThreshold = 5;
+            varianceThreshold = 1000;
+            roi = this.getROI('Probe');
+            inPiezoRange = false;
             % Should we also check the probe here?
-            while(~done)
+            % Course actuation
+            while(~inPiezoRange)
                 meanForce = this.probe.getMeanForce();
-                if (meanForce >  thresholdForce)
+                if (meanForce >  forceThreshold)
                     return
                 end
+                if (this.activeMotor.getDisplacement() + stepSize > this.activeMotor.getMaxDisplacement())
+                    
+                    return
+                end    
                 im = this.camera.getImageData();
-                roi = this.getROI('Probe');
                 probeIm = im(roi(2):roi(4), roi(1):roi(3));
                 variance = VarianceOfLaplacian(probeIm);
-                if (variance > threshold)
-                    done = true;
+                if (variance > varianceThreshold)
+                    inPiezoRange = true;
+                    this.setActiveMotor('Piezo');
                 else
-                    this.moveActiveMotor(stepSize)
+                    %We may want some kind of move completed check here
+                    moveValid = this.moveActiveMotor(stepSize);
+                    if (~moveValid)
+                        warning('Course actuator cannot make desired move. No contact made. Returning to home.');
+                        this.setActiveMotorMoveMode('Absolute');
+                        this.moveActiveMotor(0);
+                    end
                 end
             end
-            
+            % Final approach
+            while(~inContact)
+                meanForce = this.probe.getMeanForce();
+                if (meanForce >  forceThreshold)
+                    inContact = true;
+                end 
+                im = this.camera.getImageData();
+                probeIm = im(roi(2):roi(4), roi(1):roi(3));
+                variance = VarianceOfLaplacian(probeIm);
+                if (variance > varianceThreshold)
+                    inPiezoRange = true;
+                    this.setActiveMotor('Piezo');
+                else
+                    %We may want some kind of move completed check here
+                    this.moveActiveMotor(stepSize);
+                end
+            end
         end
         
         %Helper function for setting a motor position back to zero
