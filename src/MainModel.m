@@ -227,7 +227,7 @@ classdef MainModel < handle
             courseStep = -500;
             variance = 0;
             forceThreshold = 10000;
-            varianceThreshold = 54;
+            varianceThreshold = 53;
             roi = this.getROI('Probe');
             inPiezoRange = false;
             % Get constant data points

@@ -36,6 +36,8 @@ classdef MainView < handle
         roiShapeIndex = 0;
         %data
         activeImage = uint8(zeros(1000,1000));
+        imageWriteBuffer = uint8(zeros(1000,1000,6))
+        bufferIndex = 1;
         displayImage = zeros(1000,1000,3);
     end
     
@@ -148,7 +150,7 @@ classdef MainView < handle
         
         function previewFrameCallback(this, obj, event)
             %tic;
-            if (obj.FramesAvailable > 0)
+            if (obj.FramesAvailable >= 0)
                 this.activeImage = peekdata(obj,1);
                 this.applyDrawingOverlays();
                 this.jFrame.setVideoImage(im2java(this.displayImage));
@@ -171,7 +173,8 @@ classdef MainView < handle
                 [FileName,PathName] = uiputfile();
                 if (~isempty(FileName) && ~isempty(PathName))
                     this.captureVideoButton.setText('Stop Recording');
-                    this.videoWriter = VideoWriter(strcat(PathName, FileName));
+                    this.videoWriter = VideoWriter(strcat(PathName, FileName), 'MPEG-4');
+                    this.videoWriter.FrameRate = 24;
                     open(this.videoWriter)
                     this.recordingVideo = true;
                 end   
@@ -179,6 +182,7 @@ classdef MainView < handle
                 this.captureVideoButton.setText('Capture Video');
                 % Close the file.
                 close(this.videoWriter)
+                this.videoWriter.delete();
                 this.recordingVideo = false;
             end
             
