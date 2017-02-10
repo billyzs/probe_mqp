@@ -54,7 +54,7 @@ classdef (Abstract) MotorDriver < Equipment
             if (abs(position) > this.maxDisplacement)
                 errMsg = [this.name,  '::isPositionValid::'];
                 errMsg = [errMsg  'target position exceeds maxDisplacement: would be ', ...
-                    + num2str(position)] + ';';
+                    num2str(position) , ';'];
                 error(errMsg);
                 valid = 0;
             end

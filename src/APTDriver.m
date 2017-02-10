@@ -65,6 +65,11 @@ classdef APTDriver < MotorDriver
             this.hPiezo.StopCtrl;
         end
         
+        % Destructor
+        function delete(this)
+            this.disable();
+        end
+        
         % Function to execute a move of the given displacement
         function success = doMove(this, displacement)
             switch this.moveMode

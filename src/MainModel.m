@@ -204,6 +204,7 @@ classdef MainModel < handle
         end
         
         function startProbingSequence(this)
+            this.probeCurrentPoint();
             %Place multi point code here
             %loop
                 % probeCurrentPoint
@@ -215,6 +216,7 @@ classdef MainModel < handle
                 return
             end
            
+            'Starting approach'
             % Pre devices
             this.enableProbe();
             this.mvpDriver.moveHome();
@@ -222,10 +224,10 @@ classdef MainModel < handle
             this.setActiveMotor('National Aperture');
             this.setActiveMotorMoveMode('Relative');
             % Set parameters
-            courseStep = 500;
+            courseStep = -500;
             variance = 0;
-            forceThreshold = 5;
-            varianceThreshold = 1000;
+            forceThreshold = 10000;
+            varianceThreshold = 54;
             roi = this.getROI('Probe');
             inPiezoRange = false;
             % Get constant data points
@@ -237,27 +239,49 @@ classdef MainModel < handle
             % Create data object
             data = zeros(100,6); % Sec, uN, x in um, y in um, z course, z fine
             index = 1;
+            'Starting approach'
             % Start approach timer
-             tic;
+            timeout = 30;
+            tic;
             % Course actuation
             while(~inPiezoRange)
+                if (toc >  timeout)
+                    warning('Approach timedout');
+                    return
+                end
+                'Getting Force'
                 % Record data
+                this.probe.collectData();
                 meanForce = this.probe.getMeanForce();
+                meanForce
+                values = [toc, meanForce, x, y,...
+                            this.mvpDriver.getDisplacement(),...
+                            this.aptDriver.getDisplacement()]
+                size(values)
+                x
+                y
+                this.mvpDriver.getDisplacement()
+                this.aptDriver.getDisplacement()
                 data(index, :) = ...
                     [toc, meanForce, x, y,...
                     this.mvpDriver.getDisplacement(),...
                     this.aptDriver.getDisplacement()];
+                'Comparing Force'
                 % Check if contact made early and abort if so
                 if (meanForce >  forceThreshold)
+                    warning('Early contact made')
                     return
-                end   
+                end
+                'Getting Image'
                 % Get camera image and calculate variance
                 im = this.camera.getImageData();
                 probeIm = im(roi(2):roi(4), roi(1):roi(3));
-                variance = VarianceOfLaplacian(probeIm);
+                'Variance'
+                variance = VarianceOfLaplacian(probeIm)
                 if (variance > varianceThreshold)
                     inPiezoRange = true;
                 else
+                    'Move'
                     % Move course motion
                     % We may want some kind of move completed check here
                     moveValid = this.moveActiveMotor(courseStep);
@@ -267,7 +291,11 @@ classdef MainModel < handle
                         return;
                     end
                 end
+                index = index+1;
             end
+            
+            'Done'
+            return
             % Update parameters
             fineStep = 1;
             courseStep = 100;
@@ -337,6 +365,7 @@ classdef MainModel < handle
         % Attach probe and get images of probe over device and on approach
         % Implement Billy's probe auto detection method in matlab
         % Develop method for moving to next X,Y probing location
+        % Fix national aperature displacement readings
         
     end
 end

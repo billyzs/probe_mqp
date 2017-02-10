@@ -93,7 +93,14 @@ classdef MVPDriver < MotorDriver
         % Function to update the displacement after a move command
         function updateDisplacement(this, displacement)
             if(nargin == 2)
-                this.displacement = this.displacement + displacement;
+                % parse & write command
+                switch this.moveMode
+                    case 'Absolute'
+                        this.displacement = displacement;
+                        displacement
+                    case 'Relative'
+                        this.displacement = this.displacement + displacement;
+                end
             else
                 %If the actuator provides feedback use it here
             end
@@ -145,6 +152,7 @@ classdef MVPDriver < MotorDriver
         % Destructor
         function delete(this)
             this.disable();
+            this.writeCmd('RN');
         end
         
         % Function returns true if the controller is connected

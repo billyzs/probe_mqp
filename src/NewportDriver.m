@@ -50,11 +50,12 @@ classdef NewportDriver < MotorDriver
         % Constructor
         function obj = NewportDriver(numAxis)
             obj.numAxis = numAxis;
-            obj.displacementList = zeros(size(1:numAxis));
+            obj.displacementList = zeros(1,numAxis);
         end
         
         % Destructor
         function delete(this)
+            this.disable();
             if (libisloaded(this.driverLibrary))
                 unloadlibrary(this.driverLibrary)
             end
@@ -83,9 +84,9 @@ classdef NewportDriver < MotorDriver
         
         % Function to set the axis that will be used for move and set commands
         function setActiveAxis(this, axis)
-            this.displacementList(1:this.activeAxis) = this.displacement;
+            this.displacementList(this.activeAxis) = this.displacement;
             this.activeAxis = axis;
-            this.displacement = this.displacementList(1:this.activeAxis);
+            this.displacement = this.displacementList(this.activeAxis);
         end
         
         % Function to execute a move of the given displacement
