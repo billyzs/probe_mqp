@@ -23,11 +23,14 @@ classdef ForceProbe < Equipment
         end
         
         function connect(this)
+            if (~isempty(this.daqObject))
+                release(this.daqObject)
+            end
             this.daqObject = daq.createSession('ni');
             this.daqObject.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
             %Sample at 1000 Hz
             this.setSampleCount(100);
-            this.setSampleDuration(.1)
+            this.setSampleDuration(.1)                 
         end
         
         function daqObject = getDAQObject(this)

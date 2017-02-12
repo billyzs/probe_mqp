@@ -11,13 +11,13 @@ classdef MainModel < handle
         aptStrainGuage;
         newportDriver;
         camera;
-        videoTimer;
         probe;
         %Data
-        template;
+        template; % This can be preallocated as can the probe image
         homePoint = [0,0];
         roiDictionary;
         homeOffset = [0,0];
+        probeImage;
     end
         
     methods
@@ -36,6 +36,16 @@ classdef MainModel < handle
             this.roiDictionary = containers.Map(keySet, valueSet);
         end
         
+        % Destructor
+        function delete(this)
+            this.mvpDriver.delete();
+            this.aptDriver.delete();
+            this.aptStrainGuage.delete();
+            this.newportDriver.delete();
+            this.camera.delete();
+            this.probe.delete();
+        end
+        
         function setROI(this, type, roi)
             if (~isequal(size(roi), [1 4]))
                 warning('Chosen ROI is not a 1x4 matrix');
@@ -49,10 +59,6 @@ classdef MainModel < handle
         
         function roi = getROI(this, type)
             roi = this.roiDictionary(type);
-        end
-        
-        function enableProbe(this)
-            this.probe.connect();
         end
         
         function disableProbe(this)
@@ -218,7 +224,7 @@ classdef MainModel < handle
            
             'Starting approach'
             % Pre devices
-            this.enableProbe();
+            %this.probe.connect(); !!!
             this.mvpDriver.moveHome();
             this.aptDriver.moveHome();
             this.setActiveMotor('National Aperture');
@@ -227,7 +233,7 @@ classdef MainModel < handle
             courseStep = -500;
             variance = 0;
             forceThreshold = 10000;
-            varianceThreshold = 53;
+            varianceThreshold = 48;
             roi = this.getROI('Probe');
             inPiezoRange = false;
             % Get constant data points
@@ -241,7 +247,7 @@ classdef MainModel < handle
             index = 1;
             'Starting approach'
             % Start approach timer
-            timeout = 30;
+            timeout = 45;
             tic;
             % Course actuation
             while(~inPiezoRange)
@@ -251,9 +257,9 @@ classdef MainModel < handle
                 end
                 'Getting Force'
                 % Record data
-                this.probe.collectData();
-                meanForce = this.probe.getMeanForce();
-                meanForce
+                %this.probe.collectData();
+                %meanForce = this.probe.getMeanForce();
+                meanForce = 0
                 values = [toc, meanForce, x, y,...
                             this.mvpDriver.getDisplacement(),...
                             this.aptDriver.getDisplacement()]
@@ -275,9 +281,9 @@ classdef MainModel < handle
                 'Getting Image'
                 % Get camera image and calculate variance
                 im = this.camera.getImageData();
-                probeIm = im(roi(2):roi(4), roi(1):roi(3));
+                this.probeImage = im(roi(2):roi(4), roi(1):roi(3));
                 'Variance'
-                variance = VarianceOfLaplacian(probeIm)
+                variance = VarianceOfLaplacian(this.probeImage)
                 if (variance > varianceThreshold)
                     inPiezoRange = true;
                 else

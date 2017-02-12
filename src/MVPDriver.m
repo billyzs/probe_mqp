@@ -152,7 +152,6 @@ classdef MVPDriver < MotorDriver
         % Destructor
         function delete(this)
             this.disable();
-            this.writeCmd('RN');
         end
         
         % Function returns true if the controller is connected

@@ -21,7 +21,8 @@ classdef (Abstract) MotorDriver < Equipment
     
     properties (Access=protected)
         % A list of movement history
-        moves = [];
+        moves = zeros(100,4);
+        moveIndex = 0;
     end
     
     methods (Access=public, Abstract)
@@ -108,12 +109,13 @@ classdef (Abstract) MotorDriver < Equipment
             try
                 if(true == isMoveValid(this, displacement))
                     success = doMove(this, displacement);
-                    if success 
-                        this.moves = [this.moveMode,... 
+                    if success
+                        this.moves = [this.moveMode2Num(this.moveMode),... 
                                        displacement,... 
                                        this.velocity,... 
                                        this.acceleration; this.moves]; %LIFO
-                        this.updateDisplacement(displacement);
+                       moveIndex = moveIndex + 1; 
+                       this.updateDisplacement(displacement);
                     end
                     return
                 end
@@ -122,11 +124,39 @@ classdef (Abstract) MotorDriver < Equipment
             end
         end
         
+        % Function to convert a movemode into a number for storage in
+        % numeric array
+        function num = moveMode2Num(this, moveMode)
+            switch moveMode
+                case 'Absolute'
+                    num = 0;
+                case 'Relative'
+                    num = 1;
+                otherwise
+                    warning('Unexpected move mode requested')
+                    num = 2;
+            end
+        end
+        
+        % Function to convert a movemode into a number for storage in
+        % numeric array
+        function moveMode = num2MoveMode(this, num)
+            switch num
+                case 0 
+                    moveMode = 'Absolute';
+                case 1
+                    moveMode = 'Relative';
+                otherwise
+                    warning('Unexpected move mode requested')
+                    moveMode = 'Unknown';
+            end
+        end
+        
         % Function to undo the previous move command 
         function [success, undoneMove] = undoLastMove(this)
             if (~isempty(this.moves))
                 undoneMove = this.moves(1,:);
-                setMoveMode(undoneMove(1,1));
+                setMoveMode(this.num2MoveMode(undoneMove(1,1)));
                 setVelocity(undoneMove(1,3));
                 setAcceleration(undoneMove(1,4));
 

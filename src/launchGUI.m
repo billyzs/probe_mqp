@@ -15,10 +15,11 @@ function launchGUI()
     % 
     pause(4);
     % 
-     %mvpDriver = 1;
-     %aptDriver = 1;
-     %aptStrainGuage = 1;
-     %newportDriver = 1;
+%      mvpDriver = 1;
+%      aptDriver = 1;
+%      aptStrainGuage = 1;
+%      newportDriver = 1;
+%      probe = 1;
     myModel = MainModel(mvpDriver,aptDriver,aptStrainGuage, newportDriver, probe);
 
     myController = MainController(myModel);

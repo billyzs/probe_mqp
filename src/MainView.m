@@ -35,10 +35,10 @@ classdef MainView < handle
         overlayShapes = [];
         roiShapeIndex = 0;
         %data
-        activeImage = uint8(zeros(1000,1000));
-        imageWriteBuffer = uint8(zeros(1000,1000,6))
+        activeImage = zeros(1000,1000, 'uint8');
+        %imageWriteBuffer = uint8(zeros(1000,1000,6))
         bufferIndex = 1;
-        displayImage = zeros(1000,1000,3);
+        displayImage = zeros(1000,1000,3,'uint8');
     end
     
     methods
@@ -150,17 +150,19 @@ classdef MainView < handle
         
         function previewFrameCallback(this, obj, event)
             %tic;
-            if (obj.FramesAvailable >= 0)
-                this.activeImage = peekdata(obj,1);
-                this.applyDrawingOverlays();
-                this.jFrame.setVideoImage(im2java(this.displayImage));
+            if (obj.FramesAvailable > 0)
+                im = getdata(obj,1);
+                this.activeImage(:) = im(:); %Element wise copy to preallocated memory
+                %this.applyDrawingOverlays();
+                this.jFrame.setVideoImage(im2java(this.activeImage));
                 if (this.recordingVideo == true)
                     writeVideo(this.videoWriter, this.activeImage);
                 end
             end
-            flushdata(obj);
+            flushdata(obj, 'trigger');
             %toc;
         end
+        
         function captureImageButtonCallback(this, hObject, hEventData)
             if(this.controller.cameraIsActive())
                 [FileName,PathName] = uiputfile();
@@ -173,7 +175,7 @@ classdef MainView < handle
                 [FileName,PathName] = uiputfile();
                 if (~isempty(FileName) && ~isempty(PathName))
                     this.captureVideoButton.setText('Stop Recording');
-                    this.videoWriter = VideoWriter(strcat(PathName, FileName), 'MPEG-4');
+                    this.videoWriter = VideoWriter(strcat(PathName, FileName), 'Uncompressed AVI');
                     this.videoWriter.FrameRate = 24;
                     open(this.videoWriter)
                     this.recordingVideo = true;
@@ -183,12 +185,13 @@ classdef MainView < handle
                 % Close the file.
                 close(this.videoWriter)
                 this.videoWriter.delete();
+                clear this.videoWriter
                 this.recordingVideo = false;
             end
             
         end
         function positionTextFieldCallback(this, hObject, hEventData)
-            this.jogDistance = str2num(this.positionTextField.getText());
+            this.jogDistance = str2double(this.positionTextField.getText());
         end
         function positionButtonCallback(this, hObject, hEventData)
             % Home point located
@@ -206,6 +209,8 @@ classdef MainView < handle
             this.controller.startProbingSequence();
         end
         function returnButtonCallback(this, hObject, hEventData)
+            this.jFrame.dispose();
+            this.delete();
         end
         function saveDataButtonCallback(this, hObject, hEventData)
         end
@@ -347,6 +352,7 @@ classdef MainView < handle
             if (this.controller.cameraIsActive())
                 this.controller.getCamera.stop();
             end
+            this.controller.delete();
         end
     end
     

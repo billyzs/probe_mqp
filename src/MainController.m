@@ -16,6 +16,10 @@ classdef MainController < handle
             this.view = MainView(this);
         end
         
+        function delete(this)
+            this.model.delete();
+        end
+        
         function setCameraActive(this, active)
             this.model.cameraActive = active;
         end

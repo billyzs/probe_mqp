@@ -27,6 +27,16 @@ classdef APTStrainGuage < handle
             this.setMode('position');
         end
         
+        % Function to disable the motor hardware
+        function disable(this)
+            this.hActiveX.StopCtrl;
+        end
+        
+        % Destructor
+        function delete(this)
+            this.disable();
+        end
+        
         function setSerialNumber(this, serialNumber)
             this.serialNumber = serialNumber;
         end

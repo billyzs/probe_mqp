@@ -20,8 +20,8 @@ classdef (Abstract) CameraDriver < Equipment
         end
         
         % Destructor; call imaqreset to be extra safe
-        function delete(obj)
-            delete@imaq.videoinput(obj); % call super class destructor
+        function delete(this)
+            delete(this.videoObj);
             imaqreset; %
         end
         
