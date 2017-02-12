@@ -19,12 +19,6 @@ classdef (Abstract) MotorDriver < Equipment
         moveMode;
     end
     
-    properties (Access=protected)
-        % A list of movement history
-        moves = zeros(100,4);
-        moveIndex = 0;
-    end
-    
     methods (Access=public, Abstract)
         % Constructors and destructors should be defined in subclasses
         
@@ -110,11 +104,6 @@ classdef (Abstract) MotorDriver < Equipment
                 if(true == isMoveValid(this, displacement))
                     success = doMove(this, displacement);
                     if success
-                        this.moves = [this.moveMode2Num(this.moveMode),... 
-                                       displacement,... 
-                                       this.velocity,... 
-                                       this.acceleration; this.moves]; %LIFO
-                       moveIndex = moveIndex + 1; 
                        this.updateDisplacement(displacement);
                     end
                     return
@@ -122,67 +111,6 @@ classdef (Abstract) MotorDriver < Equipment
             catch exception
                 rethrow(exception);
             end
-        end
-        
-        % Function to convert a movemode into a number for storage in
-        % numeric array
-        function num = moveMode2Num(this, moveMode)
-            switch moveMode
-                case 'Absolute'
-                    num = 0;
-                case 'Relative'
-                    num = 1;
-                otherwise
-                    warning('Unexpected move mode requested')
-                    num = 2;
-            end
-        end
-        
-        % Function to convert a movemode into a number for storage in
-        % numeric array
-        function moveMode = num2MoveMode(this, num)
-            switch num
-                case 0 
-                    moveMode = 'Absolute';
-                case 1
-                    moveMode = 'Relative';
-                otherwise
-                    warning('Unexpected move mode requested')
-                    moveMode = 'Unknown';
-            end
-        end
-        
-        % Function to undo the previous move command 
-        function [success, undoneMove] = undoLastMove(this)
-            if (~isempty(this.moves))
-                undoneMove = this.moves(1,:);
-                setMoveMode(this.num2MoveMode(undoneMove(1,1)));
-                setVelocity(undoneMove(1,3));
-                setAcceleration(undoneMove(1,4));
-
-                position = undoneMove(1,2);
-
-                if (~strcmp(this.moveMode,'Absolute'))
-                    position = -position;
-                end
-                undoneMove(1,2) = position;
-                success = doMove(position);
-                this.moves = this.moves(2,:, :); % pops the lase move
-            else
-                undoneMove = ['Relative',0,0,0];
-                success = 0;
-            end
-        end
-        
-        % Function to undo all the past move commands 
-        function success = undoAll(this)
-            newMoves = [];
-            success = 1;
-            while(success == 1)
-                [success, undoneMove] = undoLastMove();
-                newMoves = [undoneMove; newMoves];
-            end
-            this.moves = newMoves;
         end
         
         % Function move the motor to its absolute 0 position
