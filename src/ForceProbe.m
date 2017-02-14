@@ -9,7 +9,8 @@ classdef ForceProbe < Equipment
     properties(Access=private)
         daqObject
         dataSample
-        forceGain = 500; %uN/V 
+        forceGain = 500; %uN/V
+        noLoadVoltage = 2.145;
     end
     
     methods
@@ -25,6 +26,14 @@ classdef ForceProbe < Equipment
         function connect(this)
             if (~isempty(this.daqObject))
                 release(this.daqObject)
+            end
+            activeDaqs = daqfind();
+            for storedDaq = activeDaqs
+                vendor = storedDaq.Vendor;
+                if (strcmp(vendor.ID, 'ni'))
+                    release(storedDaq)
+                    delete(storedDaq)
+                end
             end
             this.daqObject = daq.createSession('ni');
             this.daqObject.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
@@ -63,7 +72,7 @@ classdef ForceProbe < Equipment
                 dataSample = this.dataSample;
             end
             figure;
-            scatter(dataSample(2), dataSample(1), '.');
+            scatter(dataSample(:,2), dataSample(:,1), '.');
             xlabel('time (seconds)');
             ylabel('Voltage (V)');
             title('Free-load voltage collected from a FS-1000 LAT Probe')
@@ -72,11 +81,12 @@ classdef ForceProbe < Equipment
         function disconnect(this)
             if (~isempty(this.daqObject))
                 release(this.daqObject);
+                delete(this.daqObject);
             end
         end
         
         function meanForce = getMeanForce(this)
-            meanForce = mean(this.dataSample(:,1)) * this.forceGain;
+            meanForce = (mean(this.dataSample(:,1)) - this.noLoadVoltage) * this.forceGain;
         end
     end
     

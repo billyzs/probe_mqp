@@ -224,7 +224,7 @@ classdef MainModel < handle
            
             'Starting approach'
             % Pre devices
-            %this.probe.connect(); !!!
+            this.probe.connect();
             this.mvpDriver.moveHome();
             this.aptDriver.moveHome();
             this.setActiveMotor('National Aperture');
@@ -257,15 +257,11 @@ classdef MainModel < handle
                 end
                 'Getting Force'
                 % Record data
-                %this.probe.collectData();
-                %meanForce = this.probe.getMeanForce();
-                meanForce = 0
+                this.probe.collectData();
+                meanForce = this.probe.getMeanForce();
                 values = [toc, meanForce, x, y,...
                             this.mvpDriver.getDisplacement(),...
-                            this.aptDriver.getDisplacement()]
-                size(values)
-                x
-                y
+                            this.aptDriver.getDisplacement()];
                 this.mvpDriver.getDisplacement()
                 this.aptDriver.getDisplacement()
                 data(index, :) = ...
@@ -274,7 +270,7 @@ classdef MainModel < handle
                     this.aptDriver.getDisplacement()];
                 'Comparing Force'
                 % Check if contact made early and abort if so
-                if (meanForce >  forceThreshold)
+                if (abs(meanForce) >  forceThreshold)
                     warning('Early contact made')
                     return
                 end
@@ -283,7 +279,7 @@ classdef MainModel < handle
                 im = this.camera.getImageData();
                 this.probeImage = im(roi(2):roi(4), roi(1):roi(3));
                 'Variance'
-                variance = VarianceOfLaplacian(this.probeImage)
+                variance = VarianceOfLaplacian(this.probeImage);
                 if (variance > varianceThreshold)
                     inPiezoRange = true;
                 else
@@ -367,7 +363,7 @@ classdef MainModel < handle
         % Done: Get X and Y location for national aperature stages
         % Done: Clean up approach function
         % Split code into functions
-        % Develop testing method that can be done with the needle.
+        % Sorta Do ne: Develop testing method that can be done with the needle.
         % Attach probe and get images of probe over device and on approach
         % Implement Billy's probe auto detection method in matlab
         % Develop method for moving to next X,Y probing location

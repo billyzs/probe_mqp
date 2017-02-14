@@ -1,4 +1,6 @@
 function launchGUI()
+    clear
+    CleanUpMemory()
     addpath('src')
     imaqreset;
     mvpDriver = MVPDriver(1, 'COM4');

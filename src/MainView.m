@@ -353,6 +353,7 @@ classdef MainView < handle
                 this.controller.getCamera.stop();
             end
             this.controller.delete();
+            CleanUpMemory()
         end
     end
     
