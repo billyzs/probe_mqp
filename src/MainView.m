@@ -36,12 +36,8 @@ classdef MainView < handle
         roiShapeIndex = 0;
         %data
         activeImage = zeros(1000,1000, 'uint8');
-        %imageWriteBuffer = uint8(zeros(1000,1000,6))
         bufferIndex = 1;
         displayImage = zeros(1000,1000,3,'uint8');
-        recordingBufferSize = 12;
-        recordingBuffer = zeros(1000,1000,12,'uint8');
-        recordingBufferIndex = 1;
         vidID;
         vidPath;
     end
@@ -154,7 +150,6 @@ classdef MainView < handle
         end
         
         function previewFrameCallback(this, obj, event)
-            %tic;
             if (obj.FramesAvailable > 0)
                 im = getdata(obj,1);
                 this.activeImage(:) = im(:); %Element wise copy to preallocated memory
@@ -162,22 +157,9 @@ classdef MainView < handle
                 this.jFrame.setVideoImage(im2java(this.activeImage));
                 if (this.recordingVideo == true)
                     fwrite(this.vidID, this.activeImage);
-                    %!!!
-%                     if (this.recordingBufferIndex >= this.recordingBufferSize)
-%                        
-%                         for i = 1:this.recordingBufferSize
-%                             writeVideo(this.videoWriter, this.recordingBuffer();
-%                         end
-%                         
-%                         this.recordingBufferIndex = 1;
-%                     end
-%                     
-%                     this.recordingBuffer(:, :, this.recordingBufferIndex) = im(:);
-%                     this.recordingBufferIndex = this.recordingBufferIndex + 1;
-                 end
+                end
             end
             flushdata(obj, 'trigger');
-            %toc;
         end
         
         function captureImageButtonCallback(this, hObject, hEventData)
@@ -204,9 +186,6 @@ classdef MainView < handle
             elseif(this.recordingVideo == true)
                 
                 % Close the file.
-                %close(this.videoWriter)
-               % this.videoWriter.delete();
-                %clear this.videoWriter
                 fclose(this.vidID);
                 this.captureVideoButton.setText('Saving...');
                 VideoFromBinary(this.vidPath, 24, [1000, 1000]);
@@ -377,6 +356,10 @@ classdef MainView < handle
          function delete(this)
             if (this.controller.cameraIsActive())
                 this.controller.getCamera.stop();
+            end
+            try
+                fclose(this.vidID);
+            catch
             end
             this.controller.delete();
             CleanUpMemory()

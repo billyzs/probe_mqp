@@ -14,8 +14,5 @@ function VideoFromBinary(path, frameRate, dimensions)
     close(vw);
     fclose(f);
     delete(path);
-
-
-
 end
 
