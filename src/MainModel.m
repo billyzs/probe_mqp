@@ -180,9 +180,7 @@ classdef MainModel < handle
             [y, x] = ind2sub(size(result),idx(1));
             templateSize = size(this.template);
             this.homePoint(1) = x + templateSize(2) /2;
-            this.homePoint(2) = y + templateSize(1) /2;
-            %[this.homePoint(1), this.homePoint(2)] = template_matching(this.template, img);
-           
+            this.homePoint(2) = y + templateSize(1) /2;           
         end
         
         function homePoint = getHomePoint(this)
@@ -201,8 +199,26 @@ classdef MainModel < handle
             this.moveActiveMotor(delta(2));
             this.setActiveAxis(3);
             this.moveActiveMotor(delta(1));
+            %this.homePoint = this.identifyHomePoint();
+            %Kalman filter this?
             this.homeOffset = [delta(1), delta(2)];
+            this.homePoint = [500,500];
             %Here would be where we check if the movement was successful
+        end
+        
+        function moveToImageXY(this, x,y)
+            if (this.cameraActive == false || isempty(this.camera))
+                return
+            end
+            % Should be half camera width and resolution
+            delta = this.getDistanceComponentsMM(this.homePoint + this.homeOffset, [x, y]);
+            this.setActiveMotor('Newport XY');
+            this.setActiveMotorMoveMode('Relative');
+            this.setActiveAxis(2);
+            this.moveActiveMotor(delta(2));
+            this.setActiveAxis(3);
+            this.moveActiveMotor(delta(1));
+            this.homeOffset = this.homeOffset + [delta(1), delta(2)];
         end
         
         function delta = getDistanceComponentsMM(this, p1, p2)
@@ -211,10 +227,11 @@ classdef MainModel < handle
         
         function startProbingSequence(this)
             this.probeCurrentPoint();
+            return
             %Place multi point code here
-            %loop
-                % probeCurrentPoint
-            % return data
+            for sample = 1:40
+                this.probeCurrentPoint();
+            end
         end
         
         function probeCurrentPoint(this)

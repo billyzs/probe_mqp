@@ -30,7 +30,7 @@ classdef NewportDriver < MotorDriver
         % Function to establish connection to the driver library
         function connect(this)
             if (~libisloaded(this.driverLibrary))
-                loadlibrary(this.driverLibrary);
+                [notfound,warnings] = loadlibrary(this.driverLibrary);
                 [error] = calllib(this.driverLibrary,'esp_init_system');
                 this.catchAndPrintError(error);
             end

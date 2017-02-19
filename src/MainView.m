@@ -39,6 +39,11 @@ classdef MainView < handle
         %imageWriteBuffer = uint8(zeros(1000,1000,6))
         bufferIndex = 1;
         displayImage = zeros(1000,1000,3,'uint8');
+        recordingBufferSize = 12;
+        recordingBuffer = zeros(1000,1000,12,'uint8');
+        recordingBufferIndex = 1;
+        vidID;
+        vidPath;
     end
     
     methods
@@ -156,8 +161,20 @@ classdef MainView < handle
                 %this.applyDrawingOverlays();
                 this.jFrame.setVideoImage(im2java(this.activeImage));
                 if (this.recordingVideo == true)
-                    writeVideo(this.videoWriter, this.activeImage);
-                end
+                    fwrite(this.vidID, this.activeImage);
+                    %!!!
+%                     if (this.recordingBufferIndex >= this.recordingBufferSize)
+%                        
+%                         for i = 1:this.recordingBufferSize
+%                             writeVideo(this.videoWriter, this.recordingBuffer();
+%                         end
+%                         
+%                         this.recordingBufferIndex = 1;
+%                     end
+%                     
+%                     this.recordingBuffer(:, :, this.recordingBufferIndex) = im(:);
+%                     this.recordingBufferIndex = this.recordingBufferIndex + 1;
+                 end
             end
             flushdata(obj, 'trigger');
             %toc;
@@ -175,17 +192,25 @@ classdef MainView < handle
                 [FileName,PathName] = uiputfile();
                 if (~isempty(FileName) && ~isempty(PathName))
                     this.captureVideoButton.setText('Stop Recording');
-                    this.videoWriter = VideoWriter(strcat(PathName, FileName), 'Uncompressed AVI');
-                    this.videoWriter.FrameRate = 24;
-                    open(this.videoWriter)
+%                     this.videoWriter = VideoWriter(strcat(PathName, FileName), 'Uncompressed AVI');
+%                     this.videoWriter.FrameRate = 24;
+%                     open(this.videoWriter)
+%!!!
+                    this.vidPath = strcat(PathName, FileName);
+                    this.vidID = fopen(this.vidPath,'W');%!!!
+                    
                     this.recordingVideo = true;
                 end   
             elseif(this.recordingVideo == true)
-                this.captureVideoButton.setText('Capture Video');
+                
                 % Close the file.
-                close(this.videoWriter)
-                this.videoWriter.delete();
-                clear this.videoWriter
+                %close(this.videoWriter)
+               % this.videoWriter.delete();
+                %clear this.videoWriter
+                fclose(this.vidID);
+                this.captureVideoButton.setText('Saving...');
+                VideoFromBinary(this.vidPath, 24, [1000, 1000]);
+                this.captureVideoButton.setText('Capture Video');
                 this.recordingVideo = false;
             end
             
@@ -213,6 +238,7 @@ classdef MainView < handle
             this.delete();
         end
         function saveDataButtonCallback(this, hObject, hEventData)
+            daqDemo
         end
       
         function moveModeComboBoxCallback(this, hObject, hEventData)

@@ -1,17 +1,21 @@
+
 mydaq = daq.createSession('ni');
 mydaq.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
+mydaq.addlistener('DataAvailable',@plotData); 
+ 
 
 %Proper way to run test of 1000 samples / 1 sec
-mydaq.Rate = 1000;
-mydaq.DurationInSeconds = 1;
-[data,time] = mydaq.startForeground;
-
+mydaq.Rate = 10;
+mydaq.DurationInSeconds = 20;
 figure;
-scatter(time, data, '.');
-xlabel('time (seconds)');
-ylabel('Voltage (V)');
-title('Free-load voltage collected from a FS-1000 LAT Probe')
-release(mydaq);
+mydaq.startBackground;
+
+% figure;
+% scatter(time, data, '.');
+% xlabel('time (seconds)');
+% ylabel('Voltage (V)');
+% title('Free-load voltage collected from a FS-1000 LAT Probe')
+% release(mydaq);
 % t = 0;
 % tic;
 % sampleCount = 1000;
