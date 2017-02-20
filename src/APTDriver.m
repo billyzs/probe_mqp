@@ -81,7 +81,7 @@ classdef APTDriver < MotorDriver
                     warning('Unexpected move mode requested')
             end
             % displacement is in um; 75 volts == 20 um
-            v = min(65, (displacement / 20 * 75)); %!!! Double check this number
+            v = displacement * 3.75; %75V / 20uM = 3.75 V / uM
             this.hPiezo.SetVoltOutput(0, v); % 0 is channel ID?
             success = 1;
         end
@@ -115,6 +115,16 @@ classdef APTDriver < MotorDriver
             if(nargin == 2)
                 % Add to here is some sort of filtering based on input will
                 % be used
+                switch this.moveMode
+                    case 'Absolute'
+                        this.displacement = displacement;
+                        this.displacement
+                    case 'Relative'
+                        this.displacement = this.displacement + displacement;
+                        this.displacement
+                    otherwise
+                        warning('Unexpected move mode requested')
+                end
             end
             if (~isempty(this.hStrainGuage))
                 this.displacement = this.hStrainGuage.getPosition();

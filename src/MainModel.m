@@ -107,8 +107,7 @@ classdef MainModel < handle
             success = false;
             if (isnumeric(displacement) && ~isempty(displacement))
                 success = this.activeMotor.move(displacement);
-                this.activeMotor.updateDisplacement(displacement);
-                this.displacementUpdated = ~this.displacementUpdated;
+                this.displacementUpdated = ~this.displacementUpdated; %Filliping this bit triggers a listener
             end
         end
         
@@ -375,12 +374,12 @@ classdef MainModel < handle
         % TO DO
         % Done: Add probe object to MainModel and intialize is
         % Done: Add moveHome method to MotorDriver
-        % Confirm Relative motion on piezo
-        % Confirm getDisplacement on NA and Piezo
+        % Done: Confirm Relative motion on piezo
+        % Done: Confirm getDisplacement on NA and Piezo
         % Done: Get X and Y location for national aperature stages
         % Done: Clean up approach function
         % Split code into functions
-        % Sorta Do ne: Develop testing method that can be done with the needle.
+        % Done: Sorta Do ne: Develop testing method that can be done with the needle.
         % Attach probe and get images of probe over device and on approach
         % Implement Billy's probe auto detection method in matlab
         % Develop method for moving to next X,Y probing location

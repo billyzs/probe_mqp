@@ -14,7 +14,6 @@ classdef MainView < handle
     	returnButton;
     	saveDataButton;
         positionTextField;
-    	targetPositionTextField;
         motorsEnableButton;
         moveModeComboBox;
         activeMotorComboBox;
@@ -26,9 +25,11 @@ classdef MainView < handle
         cameraLabel;
         roiButton;
         roiTypeComboBox;
+        calibrationModeButton;
         %handles
         videoWriter;
         %states
+        systemState = SystemState.JOG_MODE;
         recordingVideo = false;
         updatingProbeROI = false;
         hasClickedOnImage = false;
@@ -70,7 +71,6 @@ classdef MainView < handle
             this.probeButton             = handle(this.jFrame.getProbeButton(),             'CallbackProperties');
             this.returnButton            = handle(this.jFrame.getReturnButton(),            'CallbackProperties');
             this.saveDataButton          = handle(this.jFrame.getSaveDataButton(),          'CallbackProperties');
-            this.targetPositionTextField = handle(this.jFrame.getTargetPositionTextField(), 'CallbackProperties');
             this.motorsEnableButton      = handle(this.jFrame.getMotorsEnableButton(),      'CallbackProperties'); 
             this.moveModeComboBox        = handle(this.jFrame.getMoveModeComboBox(),        'CallbackProperties');
             this.activeMotorComboBox     = handle(this.jFrame.getActiveMotorComboBox(),     'CallbackProperties');
@@ -81,6 +81,7 @@ classdef MainView < handle
             this.cameraLabel             = handle(this.jFrame.getCameraLabel(),             'CallbackProperties');
             this.roiButton               = handle(this.jFrame.getROIButton(),               'CallbackProperties');
             this.roiTypeComboBox         = handle(this.jFrame.getROITypeComboBox(),         'CallbackProperties');
+            this.calibrationModeButton   = handle(this.jFrame.getCalibrationModeButton(),   'CallbackProperties');
             % Set Java object callbacks
             set(this.startCameraButton,       'ActionPerformedCallback', @this.startCameraButtonCallback);
             set(this.captureImageButton,      'ActionPerformedCallback', @this.captureImageButtonCallback);
@@ -90,7 +91,6 @@ classdef MainView < handle
             set(this.probeButton,             'ActionPerformedCallback', @this.probeButtonCallback);
             set(this.returnButton,            'ActionPerformedCallback', @this.returnButtonCallback);
             set(this.saveDataButton,          'ActionPerformedCallback', @this.saveDataButtonCallback);
-            set(this.targetPositionTextField, 'ActionPerformedCallback', @this.targetPositionTextFieldCallback);
             set(this.motorsEnableButton,      'ActionPerformedCallback', @this.motorsEnableButtonCallback);
             set(this.moveModeComboBox,        'ActionPerformedCallback', @this.moveModeComboBoxCallback);
             set(this.activeMotorComboBox,     'ActionPerformedCallback', @this.activeMotorComboBoxCallback);
@@ -101,9 +101,9 @@ classdef MainView < handle
             set(this.cameraLabel,             'MouseClickedCallback',    @this.cameraLabelCallback);
             set(this.roiButton,               'ActionPerformedCallback', @this.roiButtonCallback);
             set(this.roiTypeComboBox,         'ActionPerformedCallback', @this.roiTypeComboBoxCallback);
-            
+            set(this.calibrationModeButton,   'ActionPerformedCallback', @this.calibrationModeButtonCallback);
             initComboBoxes(this);
-            
+            this.setSystemState(SystemState.JOG_MODE);
             % Display the Java window
             this.jFrame.setVisible(true);
             %Needed for the deployed version of the code
@@ -194,10 +194,15 @@ classdef MainView < handle
             end
             
         end
+        function calibrationModeButtonCallback(this, hObject, hEventData)
+            this.setSystemState(SystemState.CALIBRATION_MODE);
+        end
         function positionTextFieldCallback(this, hObject, hEventData)
             this.jogDistance = str2double(this.positionTextField.getText());
         end
         function positionButtonCallback(this, hObject, hEventData)
+            this.setSystemState(SystemState.PROBE_MODE);
+            return;
             % Home point located
             this.controller.setCameraActive(false);
             this.controller.identifyHomePoint();
@@ -289,8 +294,6 @@ classdef MainView < handle
                 this.controller.moveManualPiezo(distance);
             end
         end
-        function targetPositionTextFieldCallback(this, hObject, hEventData)
-        end
         function motorsEnableButtonCallback(this, hObject, hEventData)
             if (this.controller.getMotorsEnabled())
                 this.controller.disableMotors();
@@ -363,17 +366,90 @@ classdef MainView < handle
             end
             this.controller.delete();
             CleanUpMemory()
-        end
-    end
-    
-    
-    methods
+         end
+         
         function handlePropEvents(this,src,evnt)
             displacements = this.controller.getDisplacements();
                     str = strcat(strcat('NA = ', num2str(displacements(1))),...
                                  strcat(' PI = ', num2str(displacements(2))),...
                                  strcat(' NP = ', num2str(displacements(3))));
                     this.currentPositionTextArea.setText(str);
+        end
+        
+        function setSystemState(this, SystemState)
+            if (~isenum(SystemState) || nargin < 2)
+                error('setSystemState: Input is not an enum');
+            end
+            this.systemState = SystemState;
+            this.setButtonsForSystemState();
+        end
+        
+        function setButtonsForSystemState(this)
+            switch this.systemState
+                case SystemState.JOG_MODE
+                    this.startCameraButton.setEnabled(      true);
+                    this.captureImageButton.setEnabled(     true);
+                    this.captureVideoButton.setEnabled(     true);
+                    this.currentPositionTextArea.setEnabled(true);
+                    this.positionTextField.setEnabled(      true);
+                    this.positionButton.setEnabled(         true);
+                    this.probeButton.setEnabled(            true);
+                    this.returnButton.setEnabled(           true);
+                    this.saveDataButton.setEnabled(         true);
+                    this.motorsEnableButton.setEnabled(     true);
+                    this.moveModeComboBox.setEnabled(       true);
+                    this.activeMotorComboBox.setEnabled(    true);
+                    this.jogXNegButton.setEnabled(          true);
+                    this.jogXPosButton.setEnabled(          true);
+                    this.jogYNegButton.setEnabled(          true);
+                    this.jogYPosButton.setEnabled(          true);
+                    this.cameraLabel.setEnabled(            true);
+                    this.roiButton.setEnabled(              true);
+                    this.roiTypeComboBox.setEnabled(        true);
+                    this.calibrationModeButton.setEnabled(  true);
+                case SystemState.CALIBRATION_MODE
+                    this.startCameraButton.setEnabled(      true);
+                    this.captureImageButton.setEnabled(     true);
+                    this.captureVideoButton.setEnabled(     true);
+                    this.currentPositionTextArea.setEnabled(true);
+                    this.positionTextField.setEnabled(      true);
+                    this.positionButton.setEnabled(         false);
+                    this.probeButton.setEnabled(            false);
+                    this.returnButton.setEnabled(           true);
+                    this.saveDataButton.setEnabled(         false);
+                    this.motorsEnableButton.setEnabled(     true);
+                    this.moveModeComboBox.setEnabled(       true);
+                    this.activeMotorComboBox.setEnabled(    true);
+                    this.jogXNegButton.setEnabled(          true);
+                    this.jogXPosButton.setEnabled(          true);
+                    this.jogYNegButton.setEnabled(          true);
+                    this.jogYPosButton.setEnabled(          true);
+                    this.cameraLabel.setEnabled(            true);
+                    this.roiButton.setEnabled(              true);
+                    this.roiTypeComboBox.setEnabled(        true);
+                    this.calibrationModeButton.setEnabled(  true);
+                case SystemState.PROBE_MODE
+                    this.startCameraButton.setEnabled(      true);
+                    this.captureImageButton.setEnabled(     true);
+                    this.captureVideoButton.setEnabled(     true);
+                    this.currentPositionTextArea.setEnabled(true);
+                    this.positionTextField.setEnabled(      false);
+                    this.positionButton.setEnabled(         false);
+                    this.probeButton.setEnabled(            true);
+                    this.returnButton.setEnabled(           true);
+                    this.saveDataButton.setEnabled(         false);
+                    this.motorsEnableButton.setEnabled(     true);
+                    this.moveModeComboBox.setEnabled(       false);
+                    this.activeMotorComboBox.setEnabled(    false);
+                    this.jogXNegButton.setEnabled(          false);
+                    this.jogXPosButton.setEnabled(          false);
+                    this.jogYNegButton.setEnabled(          false);
+                    this.jogYPosButton.setEnabled(          false);
+                    this.cameraLabel.setEnabled(            true);
+                    this.roiButton.setEnabled(              false);
+                    this.roiTypeComboBox.setEnabled(        false);
+                    this.calibrationModeButton.setEnabled(  true);
+            end
         end
     end
 end
