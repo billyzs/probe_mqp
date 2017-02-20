@@ -77,6 +77,10 @@ classdef MainController < handle
             numAxis = this.model.getAvailableJogAxis();
         end
         
+        function motor = getActiveMotor(this)
+            motor = this.model.getActiveMotor();
+        end
+        
         function setActiveMotor(this, motorStr)
             this.model.setActiveMotor(motorStr);
         end
@@ -89,8 +93,12 @@ classdef MainController < handle
             displacements = this.model.getDisplacements();
         end
         
-        function setTemplate(this, roi)
-            this.model.setTemplate(roi);
+        function updateTemplateFromROI(this)
+            this.model.updateTemplateFromROI();
+        end
+        
+        function loadTemplate(this, path)
+            this.model.loadTemplate(path);
         end
         
         function identifyHomePoint(this)
@@ -103,10 +111,6 @@ classdef MainController < handle
         
         function setROI(this, type, roi)
             this.model.setROI(type, roi);
-        end
-        
-        function roiTypes = getAvailableROIs(this)
-            roiTypes = this.model.getAvailableROIs();
         end
         
         function roi = getROI(this, type)

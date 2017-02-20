@@ -15,9 +15,10 @@ classdef MainModel < handle
         %Data
         template; % This can be preallocated as can the probe image
         homePoint = [0,0];
-        roiDictionary;
+        roiList;
         homeOffset = [0,0];
         probeImage;
+        varianceThreshold;
     end
         
     methods
@@ -29,11 +30,11 @@ classdef MainModel < handle
             this.activeMotor = this.newportDriver;
             this.motorsEnabled = true;
             this.probe = probe;
-            %Define unsed ROI types
-            keySet =   {'Probe', 'Template', 'Image'};
+            %Define used ROI types
             defaultROI =[1 1 1000 1000]; %If possible this should be based on camera width
-            valueSet = {defaultROI, defaultROI, defaultROI};
-            this.roiDictionary = containers.Map(keySet, valueSet);
+            %Index corresponds to order of ROI enum.
+            % PROBE, TEMPLATE, IMAGE
+            this.roiList = {defaultROI defaultROI defaultROI};
         end
         
         % Destructor
@@ -50,15 +51,12 @@ classdef MainModel < handle
             if (~isequal(size(roi), [1 4]))
                 warning('Chosen ROI is not a 1x4 matrix');
             end
-            this.roiDictionary(type) = roi;
-        end
-        
-        function roiTypes = getAvailableROIs(this)
-            roiTypes = keys(this.roiDictionary);
+            this.roiList{type}(:) = roi(:); %Element wise copy
         end
         
         function roi = getROI(this, type)
-            roi = this.roiDictionary(type);
+            roi = this.roiList(type);
+            roi = roi{1};
         end
         
         function disableProbe(this)
@@ -133,13 +131,9 @@ classdef MainModel < handle
         end
         
         function displacements = getDisplacements(this)
-% I can't remember what this was for but it is not done
-%!!!            displacements = [this.mvpDriver.getDisplacement(),...
-%                              this.aptDriver.getDisplacement(),...
-%                              this.newportDriver.getDisplacement()];
-            displacements = [0,...
-                             0,...
-                             this.newportDriver.getDisplacement()];
+            displacements = [this.mvpDriver.getDisplacement(),...
+                              this.aptDriver.getDisplacement(),...
+                              this.newportDriver.getDisplacement()];
         end
         
         function setActiveAxis(this, axis)
@@ -163,9 +157,14 @@ classdef MainModel < handle
             end
         end
         
-        function setTemplate(this, roi)
+        function updateTemplateFromROI(this)
+            roi = this.getROI(ROI.TEMPLATE);
             im = this.camera.getImageData();
             this.template = im(roi(2):roi(4), roi(1):roi(3));%imcrop(im,[roi(1) roi(2) roi(3)-roi(1) roi(4)-roi(2)]);          
+        end
+        
+        function loadTemplate(this, path)
+            this.template = imread(path);
         end
         
         function identifyHomePoint(this)
@@ -194,9 +193,9 @@ classdef MainModel < handle
             delta = this.getDistanceComponentsMM(this.homePoint, [500, 500]);
             this.setActiveMotor('Newport XY');
             this.setActiveMotorMoveMode('Relative');
-            this.setActiveAxis(2);
+            this.setActiveAxis(2); % Y axis of newport stages up and down
             this.moveActiveMotor(delta(2));
-            this.setActiveAxis(3);
+            this.setActiveAxis(3); % X axis of newport stages left and right
             this.moveActiveMotor(delta(1));
             %this.homePoint = this.identifyHomePoint();
             %Kalman filter this?
@@ -228,9 +227,7 @@ classdef MainModel < handle
             this.probeCurrentPoint();
             return
             %Place multi point code here
-            for sample = 1:40
-                this.probeCurrentPoint();
-            end
+            this.probeCurrentPoint();
         end
         
         function probeCurrentPoint(this)
@@ -247,10 +244,9 @@ classdef MainModel < handle
             this.setActiveMotorMoveMode('Relative');
             % Set parameters
             courseStep = -500;
-            variance = 0;
-            forceThreshold = 10000;
-            varianceThreshold = 48;
-            roi = this.getROI('Probe');
+            forceThreshold = 10000; %uN
+            this.varianceThreshold = 48; %TBD
+            roi = this.getROI(ROI.PROBE);
             inPiezoRange = false;
             % Get constant data points
             this.newportDriver.setActiveAxis(3);
@@ -259,7 +255,7 @@ classdef MainModel < handle
             y = this.newportDriver.getDisplacement() - this.homeOffset(2);
             
             % Create data object
-            data = zeros(100,6); % Sec, uN, x in um, y in um, z course, z fine
+            data = zeros(100,6); % Sec, uN, x in um, y in um, z coarse, z fine
             index = 1;
             'Starting approach'
             % Start approach timer
@@ -278,12 +274,7 @@ classdef MainModel < handle
                 values = [toc, meanForce, x, y,...
                             this.mvpDriver.getDisplacement(),...
                             this.aptDriver.getDisplacement()];
-                this.mvpDriver.getDisplacement()
-                this.aptDriver.getDisplacement()
-                data(index, :) = ...
-                    [toc, meanForce, x, y,...
-                    this.mvpDriver.getDisplacement(),...
-                    this.aptDriver.getDisplacement()];
+                data(index, :) = values;
                 'Comparing Force'
                 % Check if contact made early and abort if so
                 if (abs(meanForce) >  forceThreshold)
@@ -296,7 +287,7 @@ classdef MainModel < handle
                 this.probeImage = im(roi(2):roi(4), roi(1):roi(3));
                 'Variance'
                 variance = VarianceOfLaplacian(this.probeImage);
-                if (variance > varianceThreshold)
+                if (variance > this.varianceThreshold)
                     inPiezoRange = true;
                 else
                     'Move'
@@ -316,7 +307,7 @@ classdef MainModel < handle
             return
             % Update parameters
             fineStep = 1;
-            courseStep = 100;
+            courseStep = 50;
             inContact = false;
             % Prep motors
             this.setActiveMotor('Piezo');
@@ -352,6 +343,7 @@ classdef MainModel < handle
             % Contact Made
             % Apply force then let settle then retract
             waitTime = 1;
+            % The piezo is down as positive and negative going up
             for stepDirection = [1,-1,0]
                 while(tic < waitTime + tic)
                     meanForce = this.probe.getMeanForce();
