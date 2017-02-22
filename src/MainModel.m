@@ -195,25 +195,54 @@ classdef MainModel < handle
         function moveToHomeXY(this)
             this.homeOffset = [0, 0];
             this.moveToImageXY(312,468)
-            this.homePoint = [312,468];
             %Here would be where we check if the movement was successful
         end
         
         %This needs to be changed so that it will work with chaning DUT
         %locations Currently it depends on a static home point;
-        function moveToImageXY(this, x,y)
+        function status = moveToImageXY(this, x,y, numIter)
+            if nargin < 4
+                numIter = 3;
+            end
+            status = false;
             if (this.cameraActive == false || isempty(this.camera))
                 return
             end
-            % Should be half camera width and resolution
-            delta = this.getDistanceComponentsMM(this.homePoint, [x, y]);
             this.setActiveMotor('Newport XY');
             this.setActiveMotorMoveMode('Relative');
-            this.setActiveAxis(this.Y_AXIS);
-            this.moveActiveMotor(delta(2));
-            this.setActiveAxis(this.X_AXIS);
-            this.moveActiveMotor(delta(1));
-            this.homeOffset = this.homeOffset + [delta(1), delta(2)];
+            point = this.getHomePointFromImage();
+            this.homePoint(:) = point(:);
+            for i = 1:numIter % should have done moving after this many iterations
+                delta = this.getDistanceComponentsMM(this.homePoint, [x, y]);
+                this.setActiveAxis(this.Y_AXIS);
+                this.moveActiveMotor(delta(2));
+                pause(1);
+                this.setActiveAxis(this.X_AXIS);
+                this.moveActiveMotor(delta(1));
+                pause(1);
+                this.homeOffset = this.homeOffset + [delta(1), delta(2)];
+                %Wait for movement to complete
+                % tic;
+                % while(~this.newportDriver.moveComplete([this.X_AXIS, this.Y_AXIS]))
+                    % think we need a busy wait here; when I stepped this
+                    % part it worked just fine; 
+                % pause(2);    
+                % end
+                % toc;
+                point = this.getHomePointFromImage();
+                this.homePoint(:) = point(:);
+                %If location within tolerance to target, stop; else do up
+                %to 3 moves
+                squaredErrPixel = sum(([x,y] - point).^2)
+                if  sqrt(squaredErrPixel) < 3 % pixels
+                    disp('successfully moved to specified location');
+                    status = true;
+                    break;
+                end
+            end
+            if ~status
+                sprintf('failed to move to x=%d, y=%d in %d iterations; error is %f pixels', [x, y, numIter, squaredErrPixel])
+            end
         end
         
         function delta = getDistanceComponentsMM(this, p1, p2)

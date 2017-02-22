@@ -227,7 +227,13 @@ classdef MainView < handle
             this.delete();
         end
         function saveDataButtonCallback(this, hObject, hEventData)
-            
+            this.model.newportDriver.getVelocity()
+            this.model.newportDriver.getAcceleration()
+            jerk = 0;
+            [error] = calllib('esp6000','esp_set_jerk', 3, 10)
+            [error] = calllib('esp6000','esp_set_jerk', 2, 10)
+            [error,jerk] = calllib('esp6000','esp_get_jerk', 3, jerk)
+            [error,jerk] = calllib('esp6000','esp_get_jerk', 2, jerk)
         end
       
         function moveModeComboBoxCallback(this, hObject, hEventData)

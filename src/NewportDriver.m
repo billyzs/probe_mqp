@@ -74,8 +74,10 @@ classdef NewportDriver < MotorDriver
                 this.enableMotor();
                 for axis = 1:this.numAxis
                     this.setActiveAxis(axis);
-                    this.setVelocity(this.velocity)
-                    this.setAcceleration(this.acceleration)
+                    this.setVelocity(this.velocity);
+                    this.setAcceleration(this.acceleration);
+                    %this.setTrajectoryMode(0);
+                    
                 end
             catch exception
                 clear obj;
@@ -177,7 +179,30 @@ classdef NewportDriver < MotorDriver
             end
         end
         
-        %Function to check if there is an error message and return it
+        % Function sets the trajectory profile. Should use trapazoid (0) for
+        % most situations
+        function setTrajectoryMode(this, mode)
+            [error] = calllib(this.driverLibrary,'esp_set_traj_mode', this.activeAxis, mode);
+                this.catchAndPrintError(error);
+        end
+        
+        % Function returns true when movement on the active axis is
+        % complete. An optional argument of axis to check may also be
+        % provided in the form of a list of axis numbers. The returned
+        % result will be the Logical AND of all axis in the list
+        function done = moveComplete(this, axisList)
+            if nargin == 1
+                done = calllib(this.driverLibrary,'esp_move_done', this.activeAxis);
+            else
+                done = 1;
+                for i = axisList
+                    result = calllib(this.driverLibrary,'esp_move_done', i);
+                    done = done && result;
+                end
+            end
+        end
+        
+        % Function to check if there is an error message and return it
         function [errorStr, errorNum, timeStamp] = catchErrors(this, errorExists)
             errorStr = '';
             errorPtr = libpointer('cstring', errorStr);
