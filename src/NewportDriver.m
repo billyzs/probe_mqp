@@ -7,12 +7,15 @@ classdef NewportDriver < MotorDriver
         name = 'ESP';
         
         % MotorDriver properties see parent class for description
+        % Newport Displacements are in mm and time units in sec
+        % Vel = mm/s
+        % Accl = mm/s^2
         maxDisplacement = 100;
-        maxVelocity = 1;
-        maxAcceleration = 1;
+        maxVelocity = 5;
+        maxAcceleration = 20;
         displacement = 0;
-        velocity = 1;
-        acceleration = 1;
+        velocity = 0.5;
+        acceleration = 10;
         
         % List of axis numbers controller by this object
         numAxis = 0;
@@ -48,7 +51,10 @@ classdef NewportDriver < MotorDriver
     methods (Access=public)
    
         % Constructor
-        function obj = NewportDriver(numAxis)
+        function obj = NewportDriver(numAxis, xAxis, yAxis)
+            if numAxis <= 0
+                error('Must be at least one axis on newport driver');
+            end
             obj.numAxis = numAxis;
             obj.displacementList = zeros(1,numAxis);
         end
@@ -66,6 +72,11 @@ classdef NewportDriver < MotorDriver
             try
                 this.connect();
                 this.enableMotor();
+                for axis = 1:this.numAxis
+                    this.setActiveAxis(axis);
+                    this.setVelocity(this.velocity)
+                    this.setAcceleration(this.acceleration)
+                end
             catch exception
                 clear obj;
                 rethrow(exception);

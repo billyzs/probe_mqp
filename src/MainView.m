@@ -176,9 +176,6 @@ classdef MainView < handle
                 [FileName,PathName] = uiputfile();
                 if (~isempty(FileName) && ~isempty(PathName))
                     this.captureVideoButton.setText('Stop Recording');
-%                     this.videoWriter = VideoWriter(strcat(PathName, FileName), 'Uncompressed AVI');
-%                     this.videoWriter.FrameRate = 24;
-%                     open(this.videoWriter)
                     this.vidPath = strcat(PathName, FileName);
                     this.vidID = fopen(this.vidPath,'W');
                     
@@ -189,7 +186,9 @@ classdef MainView < handle
                 % Close the file.
                 fclose(this.vidID);
                 this.captureVideoButton.setText('Saving...');
+                this.controller.setCameraActive(false);
                 VideoFromBinary(this.vidPath, 24, [1000, 1000]);
+                this.controller.setCameraActive(true);
                 this.captureVideoButton.setText('Capture Video');
                 this.recordingVideo = false;
             end
@@ -207,12 +206,12 @@ classdef MainView < handle
             this.jogDistance = str2double(this.positionTextField.getText());
         end
         function positionButtonCallback(this, hObject, hEventData)
-            this.setSystemState(SystemState.PROBE);
-            return;
+            %this.setSystemState(SystemState.PROBE);
+            %return;
             % Home point located
-            this.controller.setCameraActive(false);
+            %this.controller.setCameraActive(false);
             this.controller.identifyHomePoint();
-            this.controller.setCameraActive(true);
+            %this.controller.setCameraActive(true);
 
             homePoint = this.controller.getHomePoint();
             roiShape = Shape('Circle', [homePoint(1) homePoint(2) 3], 1, 'green', 1);
@@ -228,7 +227,7 @@ classdef MainView < handle
             this.delete();
         end
         function saveDataButtonCallback(this, hObject, hEventData)
-            daqDemo
+            
         end
       
         function moveModeComboBoxCallback(this, hObject, hEventData)
@@ -273,22 +272,22 @@ classdef MainView < handle
 
         function jogXNegButtonCallback(this, hObject, hEventData)
             this.takeStateAction();
-            this.controller.setActiveAxis(2);
-            this.controller.moveActiveMotor(-this.jogDistance);
+            this.controller.setActiveAxis(this.model.X_AXIS);
+            this.controller.moveActiveMotor(this.jogDistance);
         end
         function jogXPosButtonCallback(this, hObject, hEventData)
             this.takeStateAction();
-            this.controller.setActiveAxis(2);
-            this.controller.moveActiveMotor(this.jogDistance);
+            this.controller.setActiveAxis(this.model.X_AXIS);
+            this.controller.moveActiveMotor(-this.jogDistance);
         end
         function jogYNegButtonCallback(this, hObject, hEventData)
             this.takeStateAction();
-            this.controller.setActiveAxis(3);
+            this.controller.setActiveAxis(this.model.Y_AXIS);
             this.controller.moveActiveMotor(-this.jogDistance);
         end
         function jogYPosButtonCallback(this, hObject, hEventData)
             this.takeStateAction();
-            this.controller.setActiveAxis(3);
+            this.controller.setActiveAxis(this.model.Y_AXIS);
             this.controller.moveActiveMotor(this.jogDistance);
         end
         function takeStateAction(this)
@@ -414,6 +413,7 @@ classdef MainView < handle
             switch this.systemState
                 case SystemState.JOG
                     %No additional actions needed for jog mode
+                    this.startJogSequence();
                 case SystemState.TEMPLATE_SELECTION
                     this.startCalibration();
                 case SystemState.PROBE_REGION_SELECTION
@@ -423,6 +423,10 @@ classdef MainView < handle
                 case SystemState.PROBE
                     this.startProbeSequence();
             end
+        end
+        
+        function startJogSequence(this)
+            this.calibrationModeButton.setText('Calibrate');
         end
         
         function startVarianceCalibration(this)

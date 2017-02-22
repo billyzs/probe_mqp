@@ -14,13 +14,17 @@ classdef MainModel < handle
         probe;
         %Data
         template; % This can be preallocated as can the probe image
-        homePoint = [0,0];
+        homePoint = [0,0]; %The DUT location in the image in px
         roiList;
-        homeOffset = [0,0];
+        homeOffset = [0,0]; %The location of the DUT relative to its starting configuration in mm
         probeImage;
         varianceThreshold;
     end
-        
+    properties (Constant)
+        %Constants
+        X_AXIS = 3;
+        Y_AXIS = 2;
+    end
     methods
         function this = MainModel(mvpDriver, aptDriver, aptStrainGuage, newportDriver, probe)
             this.mvpDriver = mvpDriver;
@@ -160,7 +164,7 @@ classdef MainModel < handle
         function updateTemplateFromROI(this)
             roi = this.getROI(ROI.TEMPLATE);
             im = this.camera.getImageData();
-            this.template = im(roi(2):roi(4), roi(1):roi(3));%imcrop(im,[roi(1) roi(2) roi(3)-roi(1) roi(4)-roi(2)]);          
+            this.template = im(roi(2):roi(4), roi(1):roi(3));
         end
         
         function loadTemplate(this, path)
@@ -168,8 +172,12 @@ classdef MainModel < handle
         end
         
         function identifyHomePoint(this)
+            point = this.getHomePointFromImage();
+            this.homePoint(:) = point(:);          
+        end
+        
+        function point = getHomePointFromImage(this)
             img = this.camera.getImageData();
-            %% Compute
             % Invoke mex function to search for matches between an image patch and an
             % input image.
             result = matchTemplateOCV(this.template, img);
@@ -177,8 +185,7 @@ classdef MainModel < handle
             [~, idx] = max(abs(result(:)));
             [y, x] = ind2sub(size(result),idx(1));
             templateSize = size(this.template);
-            this.homePoint(1) = x + templateSize(2) /2;
-            this.homePoint(2) = y + templateSize(1) /2;           
+            point = [x + templateSize(2) /2, y + templateSize(1) /2];
         end
         
         function homePoint = getHomePoint(this)
@@ -186,48 +193,68 @@ classdef MainModel < handle
         end
         
         function moveToHomeXY(this)
-            if (this.cameraActive == false || isempty(this.camera))
-                return
-            end
-            % Should be half camera width and resolution
-            delta = this.getDistanceComponentsMM(this.homePoint, [500, 500]);
-            this.setActiveMotor('Newport XY');
-            this.setActiveMotorMoveMode('Relative');
-            this.setActiveAxis(2); % Y axis of newport stages up and down
-            this.moveActiveMotor(delta(2));
-            this.setActiveAxis(3); % X axis of newport stages left and right
-            this.moveActiveMotor(delta(1));
-            %this.homePoint = this.identifyHomePoint();
-            %Kalman filter this?
-            this.homeOffset = [delta(1), delta(2)];
-            this.homePoint = [500,500];
+            this.homeOffset = [0, 0];
+            this.moveToImageXY(312,468)
+            this.homePoint = [312,468];
             %Here would be where we check if the movement was successful
         end
         
+        %This needs to be changed so that it will work with chaning DUT
+        %locations Currently it depends on a static home point;
         function moveToImageXY(this, x,y)
             if (this.cameraActive == false || isempty(this.camera))
                 return
             end
             % Should be half camera width and resolution
-            delta = this.getDistanceComponentsMM(this.homePoint + this.homeOffset, [x, y]);
+            delta = this.getDistanceComponentsMM(this.homePoint, [x, y]);
             this.setActiveMotor('Newport XY');
             this.setActiveMotorMoveMode('Relative');
-            this.setActiveAxis(2);
+            this.setActiveAxis(this.Y_AXIS);
             this.moveActiveMotor(delta(2));
-            this.setActiveAxis(3);
+            this.setActiveAxis(this.X_AXIS);
             this.moveActiveMotor(delta(1));
             this.homeOffset = this.homeOffset + [delta(1), delta(2)];
         end
         
         function delta = getDistanceComponentsMM(this, p1, p2)
-            delta = -((p2 - p1) * (this.camera.getPixelSize() / 1000));
+            delta = -(arrayfun(@this.pxToUm,(p2 - p1)) / 1000); % -([dx, dy]um /(um / mm)))
+        end
+
+        function um = umToPx(this, p)
+            um = (1 / this.camera.getPixelSize()) * p; % (1 / (um/px)) * [dx, dy]
+        end
+        
+        function px = pxToUm(this, p)
+            px = this.camera.getPixelSize() * p; % (um/px) * [dx, dy]
         end
         
         function startProbingSequence(this)
-            this.probeCurrentPoint();
-            return
+            %this.probeCurrentPoint();
+            %return
+            'Sequence'
+            samplesPerSide = [5,5]; %5 x 5 sample square
+            regionDim = [300, 300]; %um
+            buffer = 30; %um
+            searchDim = regionDim - buffer;
+            center = [searchDim(1)/2, searchDim(2)/2];
+            
+            pxSteps = arrayfun(@this.umToPx, searchDim ./ samplesPerSide);
+
+            %Gets the number of steps from the center to the upper left
+            %corner of a NxM square of points;
+            this.homePoint
+            stepsToStartPoint = floor(samplesPerSide / 2) - (0.5 * ~mod(samplesPerSide, 2));
+            startPoint = this.homePoint + (stepsToStartPoint .* pxSteps);
+            for sampleX = 0:(samplesPerSide(1)-1)
+                for sampleY = 0:(samplesPerSide(2)-1)
+                    target = startPoint - ([sampleX, sampleY] .* pxSteps);
+                    this.moveToImageXY(target(1),target(2));
+                    this.homePoint(:) = target(:);
+                    pause(0.5); %!!!
+                end
+            end
             %Place multi point code here
-            this.probeCurrentPoint();
+            %this.probeCurrentPoint();
         end
         
         function probeCurrentPoint(this)

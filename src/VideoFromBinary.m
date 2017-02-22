@@ -6,10 +6,15 @@ function VideoFromBinary(path, frameRate, dimensions)
     vw = VideoWriter(strcat(path, '.avi'), 'Uncompressed AVI');
     vw.FrameRate = frameRate;
     open(vw)
-    im = uint8(fread(f, dimensions, 'uint8'));
-    while(~isempty(im))
-        writeVideo(vw, im);
+    try
         im = uint8(fread(f, dimensions, 'uint8'));
+        while(~isempty(im))
+            writeVideo(vw, im);
+            im = uint8(fread(f, dimensions, 'uint8'));
+        end
+    catch
+        close(vw);
+        fclose(f);
     end
     close(vw);
     fclose(f);
