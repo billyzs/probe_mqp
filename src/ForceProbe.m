@@ -10,7 +10,8 @@ classdef ForceProbe < Equipment
         daqObject
         dataSample
         forceGain = 500; %uN/V
-        noLoadVoltage = 2.145;
+        noLoadVoltage = 2.16;
+        connected = false;
     end
     
     methods
@@ -37,9 +38,10 @@ classdef ForceProbe < Equipment
             end
             this.daqObject = daq.createSession('ni');
             this.daqObject.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
-            %Sample at 1000 Hz
+            %Sample at 100 Hz
             this.setSampleCount(100);
-            this.setSampleDuration(.1)                 
+            this.setSampleDuration(.1);
+            this.connected = true;
         end
         
         function daqObject = getDAQObject(this)
@@ -81,12 +83,24 @@ classdef ForceProbe < Equipment
         function disconnect(this)
             if (~isempty(this.daqObject))
                 release(this.daqObject);
-                delete(this.daqObject);
             end
+            this.connected = false;
+        end
+        
+        function status = isConnected(this)
+            status = this.connected;
         end
         
         function meanForce = getMeanForce(this)
             meanForce = (mean(this.dataSample(:,1)) - this.noLoadVoltage) * this.forceGain;
+        end
+        
+        function updateNoLoadVoltage(this)
+            this.collectData();
+            this.noLoadVoltage = mean(this.dataSample(:,1));
+        end
+        function v = getNoLoadVoltage(this)
+            v = this.noLoadVoltage;
         end
     end
     

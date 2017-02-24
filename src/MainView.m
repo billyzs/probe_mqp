@@ -227,13 +227,10 @@ classdef MainView < handle
             this.delete();
         end
         function saveDataButtonCallback(this, hObject, hEventData)
-            this.model.newportDriver.getVelocity()
-            this.model.newportDriver.getAcceleration()
-            jerk = 0;
-            [error] = calllib('esp6000','esp_set_jerk', 3, 10)
-            [error] = calllib('esp6000','esp_set_jerk', 2, 10)
-            [error,jerk] = calllib('esp6000','esp_get_jerk', 3, jerk)
-            [error,jerk] = calllib('esp6000','esp_get_jerk', 2, jerk)
+            im = this.model.camera.getImageData();
+            roi = this.model.getROI(ROI.PROBE);
+             p =im(roi(2):roi(4), roi(1):roi(3));
+            VarianceOfLaplacian(p)
         end
       
         function moveModeComboBoxCallback(this, hObject, hEventData)
@@ -308,7 +305,10 @@ classdef MainView < handle
                     probeImg = this.activeImage(roi(2):roi(4), roi(1):roi(3));
                     this.varianceCalibrationData(this.varianceDataIndex, 1) = displacements(1);
                     this.varianceCalibrationData(this.varianceDataIndex, 2) = VarianceOfLaplacian(probeImg);
-                    scatter(this.varianceCalibrationData(:,1), this.varianceCalibrationData(:,2));
+                    plot(this.varianceCalibrationData(:,1), this.varianceCalibrationData(:,2));
+                    title('Variance vs NA Displacement');
+                    xlabel('Displacement');
+                    ylabel('Variance of Laplacian');
                     this.varianceDataIndex = this.varianceDataIndex + 1;
             end 
         end

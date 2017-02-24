@@ -97,10 +97,8 @@ classdef MVPDriver < MotorDriver
                 switch this.moveMode
                     case 'Absolute'
                         this.displacement = displacement;
-                        this.displacement
                     case 'Relative'
                         this.displacement = this.displacement + displacement;
-                        this.displacement
                 end
             else
                 %If the actuator provides feedback use it here

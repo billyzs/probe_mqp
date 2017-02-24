@@ -132,6 +132,14 @@ classdef MainController < handle
         function disableProbe(this)
             this.model.disableProbe();
         end
+        
+        function showLiveForce(this)
+            this.model.showLiveForce();
+        end
+        
+        function closeLiveForceDisplay(this)
+            this.model.closeLiveForceDisplay();
+        end
     end
     
 end

@@ -11,7 +11,6 @@ function launchGUI()
     aptStrainGuage = APTStrainGuage(84813062);
     aptStrainGuage.identify();
     newportDriver = NewportDriver(3);
-    newportDriver.enable();
 
     probe = ForceProbe();
     % 

@@ -1,13 +1,18 @@
 
 mydaq = daq.createSession('ni');
 mydaq.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
-mydaq.addlistener('DataAvailable',@plotData); 
- 
+%mydaq.addlistener('DataAvailable',@plotData); 
+mydaq.addlistener('DataAvailable', @(src,event) plot(event.TimeStamps, event.Data));
 
 %Proper way to run test of 1000 samples / 1 sec
-mydaq.Rate = 10;
-mydaq.DurationInSeconds = 20;
+mydaq.Rate = 1000;
+%mydaq.DurationInSeconds = 20;
+mydaq.NotifyWhenDataAvailableExceeds = 100;
+mydaq.IsContinuous = true;
 figure;
+xlabel('time (seconds)');
+ylabel('Voltage (V)');
+title('Voltage from a FS-1000 LAT Probe')
 mydaq.startBackground;
 
 % figure;

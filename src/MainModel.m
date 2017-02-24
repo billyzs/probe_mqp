@@ -233,7 +233,7 @@ classdef MainModel < handle
                 this.homePoint(:) = point(:);
                 %If location within tolerance to target, stop; else do up
                 %to 3 moves
-                squaredErrPixel = sum(([x,y] - point).^2)
+                squaredErrPixel = sum(([x,y] - point).^2);
                 if  sqrt(squaredErrPixel) < 3 % pixels
                     disp('successfully moved to specified location');
                     status = true;
@@ -258,8 +258,10 @@ classdef MainModel < handle
         end
         
         function startProbingSequence(this)
-            %this.probeCurrentPoint();
-            %return
+            this.probe.connect();
+            this.probe.updateNoLoadVoltage();
+            this.probeCurrentPoint();
+            return
             'Sequence'
             samplesPerSide = [5,5]; %5 x 5 sample square
             regionDim = [300, 300]; %um
@@ -293,29 +295,28 @@ classdef MainModel < handle
            
             'Starting approach'
             % Pre devices
-            this.probe.connect();
-            this.mvpDriver.moveHome();
+            
+            % this.mvpDriver.moveHome();
             this.aptDriver.moveHome();
             this.setActiveMotor('National Aperture');
             this.setActiveMotorMoveMode('Relative');
             % Set parameters
             courseStep = -500;
-            forceThreshold = 10000; %uN
-            this.varianceThreshold = 48; %TBD
+            forceThreshold = 20; %uN
+            this.varianceThreshold = 33; %TBD
             roi = this.getROI(ROI.PROBE);
             inPiezoRange = false;
             % Get constant data points
-            this.newportDriver.setActiveAxis(3);
-            x = this.newportDriver.getDisplacement() - this.homeOffset(1);
-            this.newportDriver.setActiveAxis(2);
-            y = this.newportDriver.getDisplacement() - this.homeOffset(2);
+            %this.newportDriver.setActiveAxis(3);
+            x = this.homePoint(1);
+            %this.newportDriver.setActiveAxis(2);
+            y = this.homePoint(2);
             
             % Create data object
             data = zeros(100,6); % Sec, uN, x in um, y in um, z coarse, z fine
             index = 1;
-            'Starting approach'
             % Start approach timer
-            timeout = 45;
+            timeout = 1000;
             tic;
             % Course actuation
             while(~inPiezoRange)
@@ -327,10 +328,9 @@ classdef MainModel < handle
                 % Record data
                 this.probe.collectData();
                 meanForce = this.probe.getMeanForce();
-                values = [toc, meanForce, x, y,...
+                data(index, :) = [toc, meanForce, x, y,...
                             this.mvpDriver.getDisplacement(),...
                             this.aptDriver.getDisplacement()];
-                data(index, :) = values;
                 'Comparing Force'
                 % Check if contact made early and abort if so
                 if (abs(meanForce) >  forceThreshold)
@@ -342,14 +342,15 @@ classdef MainModel < handle
                 im = this.camera.getImageData();
                 this.probeImage = im(roi(2):roi(4), roi(1):roi(3));
                 'Variance'
-                variance = VarianceOfLaplacian(this.probeImage);
+                variance = VarianceOfLaplacian(this.probeImage)
                 if (variance > this.varianceThreshold)
                     inPiezoRange = true;
                 else
                     'Move'
                     % Move course motion
                     % We may want some kind of move completed check here
-                    moveValid = this.moveActiveMotor(courseStep);
+                    step = max(20, min(5000, 20 + 1 * (this.varianceThreshold - variance)^3));
+                    moveValid = this.moveActiveMotor(-step);
                     if (~moveValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');
                         this.mvpDriver.moveHome();
@@ -359,11 +360,9 @@ classdef MainModel < handle
                 index = index+1;
             end
             
-            'Done'
-            return
             % Update parameters
-            fineStep = 1;
-            courseStep = 50;
+            fineStep = 1; %um
+            courseStep = 10; %NA displacement units
             inContact = false;
             % Prep motors
             this.setActiveMotor('Piezo');
@@ -371,7 +370,11 @@ classdef MainModel < handle
             % Final approach
             while(~inContact)
                 % Step fine actuator
-                moveValid = this.moveActiveMotor(fineStep);
+                if this.aptDriver.getDisplacement() + fineStep > this.aptDriver.getMaxDisplacement()
+                    moveValid = false;
+                else 
+                    moveValid = this.moveActiveMotor(fineStep);
+                end
                 if (~moveValid)
                     % Fine actuator cannot make contact use course actuator
                     warning('Fine actuator cannot make desired move. Using course actuator.');
@@ -386,6 +389,7 @@ classdef MainModel < handle
                     this.setActiveMotor('Piezo');
                     this.setActiveMotorMoveMode('Relative');
                 end
+                this.probe.collectData();
                 % Check if contact made and record data
                 meanForce = this.probe.getMeanForce();
                 data(index, :) = ...
@@ -398,25 +402,56 @@ classdef MainModel < handle
             end
             % Contact Made
             % Apply force then let settle then retract
-            waitTime = 1;
+            fineStep = 0.2; %um
             % The piezo is down as positive and negative going up
-            for stepDirection = [1,-1,0]
-                while(tic < waitTime + tic)
-                    meanForce = this.probe.getMeanForce();
-                    data(index, :) = ...
-                        [toc + contactTime, meanForce, x, y,...
-                        this.mvpDriver.getDisplacement(),...
-                        this.aptDriver.getDisplacement()];
+            pause(0.1);
+            
+            for step = 1:10
+                this.probe.collectData();
+                meanForce = this.probe.getMeanForce();
+                if (meanForce > 3 * forceThreshold)
+                    warning('Force too high returning home');
+                    this.aptDriver.moveHome();
+                    return;
                 end
-                this.moveActiveMotor(stepSize * stepDirection);
+                data(index, :) = ...
+                    [toc, meanForce, x, y,...
+                    this.mvpDriver.getDisplacement(),...
+                    this.aptDriver.getDisplacement()];
+                this.moveActiveMotor(fineStep);
+                index = index + 1;
             end
 
             % Retract and complete sample
-            this.mvpDriver.moveHome();
             this.aptDriver.moveHome();
+            pause(.1);
+            %this.mvpDriver.moveHome();
             this.disableProbe();
             % Complete
             % Do something with data !!!
+        end
+        
+        function showLiveForce(this)
+            if (~this.probe.isConnected())
+                this.probe.connect();
+            end
+            mydaq = this.probe.getDAQObject();
+            mydaq.addlistener('DataAvailable',@plotData); 
+            
+
+            %Proper way to run test of 1000 samples / 1 sec
+            mydaq.Rate = 10;
+            mydaq.DurationInSeconds = 20;
+            figure;
+            mydaq.startBackground;
+        end
+        
+        function closeLiveForceDisplay(this)
+            if (~this.probe.isConnected())
+                return
+            end
+            mydaq = this.probe.getDAQObject();
+            mydaq.stopBackground;
         end
         
         % TO DO
