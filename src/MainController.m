@@ -132,6 +132,10 @@ classdef MainController < handle
         function disableProbe(this)
             this.model.disableProbe();
         end
+        
+        function setVarianceThreshold(this, var)
+            this.model.setVarianceThreshold(var);
+        end
     end
     
 end
