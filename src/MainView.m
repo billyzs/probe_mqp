@@ -210,8 +210,8 @@ classdef MainView < handle
             defaultans = {'30'};
             inputLines = 1;
             inputWidth = 40;
-            variance = inputdlg(prompt,name,[inputLines inputWidth],defaultans)
-            this.controller.setVarianceThreshold(str2num(variance));
+            variance = inputdlg(prompt,name,[inputLines inputWidth],defaultans);
+            this.controller.setVarianceThreshold(str2double(variance));
         end
         
         function positionTextFieldCallback(this, hObject, hEventData)
@@ -308,18 +308,20 @@ classdef MainView < handle
         function takeStateAction(this)
             switch this.systemState
                 case SystemState.VARIANCE_CALIBRATION
-                    if (isempty(this.varFig))
+                    if (~isempty(this.varFig) && ishandle(this.varFig) ...
+                            && strcmp(get(this.varFig, 'type'), 'figure'))
+                        figure(this.varFig);
+                    else
                         this.varFig = figure;
                     end
-                    figure(this.varFig);
                     displacements = this.controller.getDisplacements();
                     roi = this.controller.getROI(ROI.PROBE);
                     probeImg = this.activeImage(roi(2):roi(4), roi(1):roi(3));
                     this.varianceCalibrationData(this.varianceDataIndex, 1) = displacements(1);
                     this.varianceCalibrationData(this.varianceDataIndex, 2) = VarianceOfLaplacian(probeImg);
-                    plot(this.varianceCalibrationData(:,1), this.varianceCalibrationData(:,2));
+                    plot(this.varianceCalibrationData(:,1), this.varianceCalibrationData(:,2), '.');
                     title('Variance vs NA Displacement');
-                    xlabel('Displacement');
+                    xlabel('Displacement (um)');
                     ylabel('Variance of Laplacian');
                     this.varianceDataIndex = this.varianceDataIndex + 1;
             end 

@@ -135,7 +135,7 @@ classdef MainModel < handle
         end
         
         function displacements = getDisplacements(this)
-            displacements = [this.mvpDriver.getDisplacement(),...
+            displacements = [this.mvpDriver.getDisplacementUM(),...
                               this.aptDriver.getDisplacement(),...
                               this.newportDriver.getDisplacement()];
         end
@@ -349,7 +349,7 @@ classdef MainModel < handle
                     'Move'
                     % Move course motion
                     % We may want some kind of move completed check here
-                    step = max(20, min(5000, 20 + 1 * (this.varianceThreshold - variance)^3));
+                    step = max(20, min(5000, 50 * (this.varianceThreshold - variance)))
                     moveValid = this.moveActiveMotor(-step);
                     if (~moveValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');

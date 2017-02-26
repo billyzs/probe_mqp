@@ -17,6 +17,7 @@ classdef MVPDriver < MotorDriver
         velocity = 100;
         acceleration = 100;
         moveMode = 'Relative';
+        umPerCount = 0.1240; % um / ecoder count
         
     end
     
@@ -189,6 +190,12 @@ classdef MVPDriver < MotorDriver
         % Function returns the active com port
         function cp = getComPort(this)
             cp = this.comPort;
+        end
+        
+        % Function returns the current displacement converted from encoder
+        % ticks into um
+        function um = getDisplacementUM(this)
+            um = this.getDisplacement() * this.umPerCount;
         end
     end
 
