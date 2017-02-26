@@ -140,7 +140,10 @@ classdef MainController < handle
         function closeLiveForceDisplay(this)
             this.model.closeLiveForceDisplay();
         end
-    end
+        function setVarianceThreshold(this, var)
+            this.model.setVarianceThreshold(var);
+        end
+    
     
 end
 

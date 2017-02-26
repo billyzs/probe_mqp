@@ -303,7 +303,7 @@ classdef MainModel < handle
             % Set parameters
             courseStep = -500;
             forceThreshold = 20; %uN
-            this.varianceThreshold = 33; %TBD
+            %this.varianceThreshold = 48; %TBD
             roi = this.getROI(ROI.PROBE);
             inPiezoRange = false;
             % Get constant data points
@@ -452,6 +452,9 @@ classdef MainModel < handle
             end
             mydaq = this.probe.getDAQObject();
             mydaq.stopBackground;
+        end
+        function setVarianceThreshold(this, var)
+            this.varianceThreshold = var;
         end
         
         % TO DO

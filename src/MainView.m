@@ -199,9 +199,21 @@ classdef MainView < handle
                 case SystemState.JOG
                     this.setSystemState(SystemState.TEMPLATE_SELECTION);
                 case SystemState.VARIANCE_CALIBRATION
+                    this.getVarianceFromUser();
                     this.setSystemState(SystemState.JOG);
             end
         end
+        
+        function getVarianceFromUser(this)
+            prompt={'Enter the variance threshold value'};
+            name = 'Variance Threshold';
+            defaultans = {'30'};
+            inputLines = 1;
+            inputWidth = 40;
+            variance = inputdlg(prompt,name,[inputLines inputWidth],defaultans)
+            this.controller.setVarianceThreshold(str2num(variance));
+        end
+        
         function positionTextFieldCallback(this, hObject, hEventData)
             this.jogDistance = str2double(this.positionTextField.getText());
         end

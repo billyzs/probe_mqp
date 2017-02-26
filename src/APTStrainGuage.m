@@ -1,10 +1,15 @@
-classdef APTStrainGuage < handle
+classdef APTStrainGuage < Equipment
     
     properties(Access = private)
         fig;
         hActiveX;
         serialNumber;
         mode;
+    end
+    
+    properties (Access = protected)
+        % Equipment
+        name = 'APTStrainGuage';
     end
     
     properties(Access = private, Constant)
