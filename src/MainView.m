@@ -205,13 +205,26 @@ classdef MainView < handle
         end
         
         function getVarianceFromUser(this)
-            prompt={'Enter the variance threshold value'};
+            prompt={'Enter the variance threshold value',...
+                'Enter the displacement cuttoff value in um'};
             name = 'Variance Threshold';
-            defaultans = {'30'};
+            defaultans = {'30', '-1500'};
             inputLines = 1;
             inputWidth = 40;
-            variance = inputdlg(prompt,name,[inputLines inputWidth],defaultans);
-            this.controller.setVarianceThreshold(str2double(variance));
+            values = inputdlg(prompt,name,...
+                [inputLines inputWidth; inputLines inputWidth],defaultans);
+            this.controller.setVarianceThreshold(str2double(values(1)));
+            this.controller.setVarianceFitDisplacementCuttoff(str2double(values(2)));
+            
+            data = this.varianceCalibrationData(1:this.varianceDataIndex, :);
+            columnMask = data(:,1) < str2double(values(2));
+            data = data([columnMask, columnMask]);
+            data = reshape(data, [],2);
+            [A, B] = estimateExp( data(:,2), data(:,1), data(1,2));
+            figure
+            hold on
+            plot(data(:,1), A*exp(B*data(:,1)) + data(1,2));
+            scatter(data(:,1), data(:,2), '.');
         end
         
         function positionTextFieldCallback(this, hObject, hEventData)
@@ -451,6 +464,8 @@ classdef MainView < handle
         
         function startVarianceCalibration(this)
             this.calibrationModeButton.setText('Finish Calibration');
+            this.varianceCalibrationData(:) = 0;
+            this.varianceDataIndex = 1;
         end
         
         function startProbeSelction(this)

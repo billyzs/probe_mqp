@@ -18,7 +18,8 @@ classdef MainModel < handle
         roiList;
         homeOffset = [0,0]; %The location of the DUT relative to its starting configuration in mm
         probeImage;
-        varianceThreshold;
+        varianceThreshold = 30;
+        varianceFitDisplacementCuttoff = -1500;
     end
     properties (Constant)
         %Constants
@@ -349,7 +350,9 @@ classdef MainModel < handle
                     'Move'
                     % Move course motion
                     % We may want some kind of move completed check here
-                    step = max(20, min(5000, 50 * (this.varianceThreshold - variance)))
+                    % Min = 10um = 80 ticks, Max = 500um = 4032 ticks
+                    %step = max(80, min(4032, 50 * (this.varianceThreshold - variance)))
+                    step = max(20, min(5000, 1 * (this.varianceThreshold - variance)^3))
                     moveValid = this.moveActiveMotor(-step);
                     if (~moveValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');
@@ -456,7 +459,9 @@ classdef MainModel < handle
         function setVarianceThreshold(this, var)
             this.varianceThreshold = var;
         end
-        
+        function setVarianceFitDisplacementCuttoff(this, cuttoff)
+            this.varianceFitDisplacementCuttoff = cuttoff;
+        end
         % TO DO
         % Done: Add probe object to MainModel and intialize is
         % Done: Add moveHome method to MotorDriver

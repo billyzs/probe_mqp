@@ -143,6 +143,9 @@ classdef MainController < handle
         function setVarianceThreshold(this, var)
             this.model.setVarianceThreshold(var);
         end
+        function setVarianceFitDisplacementCuttoff(this, cuttoff)
+            this.model.setVarianceFitDisplacementCuttoff(cuttoff);
+        end
     end
     
 end
