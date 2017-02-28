@@ -259,7 +259,9 @@ classdef MainModel < handle
         end
         
         function startProbingSequence(this)
+            this.camera.stop();
             this.probe.connect();
+            this.camera.start();
             this.probe.updateNoLoadVoltage();
             this.probeCurrentPoint();
             return
@@ -313,6 +315,8 @@ classdef MainModel < handle
             %this.newportDriver.setActiveAxis(2);
             y = this.homePoint(2);
             
+            target = -18000; %ticks
+            
             % Create data object
             data = zeros(100,6); % Sec, uN, x in um, y in um, z coarse, z fine
             index = 1;
@@ -336,15 +340,13 @@ classdef MainModel < handle
                 % Check if contact made early and abort if so
                 if (abs(meanForce) >  forceThreshold)
                     warning('Early contact made')
+                    this.mvpDriver.moveHome();
                     return
                 end
-                'Getting Image'
+                'Getting Displacement'
                 % Get camera image and calculate variance
-                im = this.camera.getImageData();
-                this.probeImage = im(roi(2):roi(4), roi(1):roi(3));
-                'Variance'
-                variance = VarianceOfLaplacian(this.probeImage)
-                if (variance > this.varianceThreshold)
+                error = abs(target) - abs(this.mvpDriver.getDisplacement());
+                if (error < 1)
                     inPiezoRange = true;
                 else
                     'Move'
@@ -352,7 +354,8 @@ classdef MainModel < handle
                     % We may want some kind of move completed check here
                     % Min = 10um = 80 ticks, Max = 500um = 4032 ticks
                     %step = max(80, min(4032, 50 * (this.varianceThreshold - variance)))
-                    step = max(20, min(5000, 1 * (this.varianceThreshold - variance)^3))
+                    %step = max(20, min(5000, 1 * (this.varianceThreshold - variance)^3))
+                    step = max(8, 0.6 * error)
                     moveValid = this.moveActiveMotor(-step);
                     if (~moveValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');

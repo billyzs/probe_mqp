@@ -28,14 +28,6 @@ classdef ForceProbe < Equipment
             if (~isempty(this.daqObject))
                 release(this.daqObject)
             end
-            activeDaqs = daqfind();
-            for storedDaq = activeDaqs
-                vendor = storedDaq.Vendor;
-                if (strcmp(vendor.ID, 'ni'))
-                    release(storedDaq)
-                    delete(storedDaq)
-                end
-            end
             this.daqObject = daq.createSession('ni');
             this.daqObject.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
             %Sample at 100 Hz

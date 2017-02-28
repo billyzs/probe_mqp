@@ -1,3 +1,5 @@
+
+
 path = 'C:\Users\holo\Desktop\ApproachPics_1_20\2_10_17\';
 
 files = dir([path '*.bmp']);
