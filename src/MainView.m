@@ -220,10 +220,12 @@ classdef MainView < handle
             columnMask = data(:,1) < str2double(values(2));
             data = data([columnMask, columnMask]);
             data = reshape(data, [],2);
-            [A, B] = estimateExp( data(:,2), data(:,1), data(1,2));
+            expFunc = ExpFunction(0,0,0);
+            expFunc.estimateExp( data(:,2), data(:,1), data(1,2), true);
+            this.controller.setExpFunc(expFunc);
             figure
             hold on
-            plot(data(:,1), A*exp(B*data(:,1)) + data(1,2));
+            plot(data(:,1), expFunc.getY(data(:,1)));
             scatter(data(:,1), data(:,2), '.');
         end
         

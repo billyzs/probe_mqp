@@ -146,6 +146,9 @@ classdef MainController < handle
         function setVarianceFitDisplacementCuttoff(this, cuttoff)
             this.model.setVarianceFitDisplacementCuttoff(cuttoff);
         end
+        function setExpFunc(this, expFunction)
+            this.model.expFunction = expFunction;
+        end
     end
     
 end

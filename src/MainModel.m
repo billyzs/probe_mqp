@@ -20,6 +20,7 @@ classdef MainModel < handle
         probeImage;
         varianceThreshold = 30;
         varianceFitDisplacementCuttoff = -1500;
+        expFunction;
     end
     properties (Constant)
         %Constants
@@ -464,6 +465,18 @@ classdef MainModel < handle
         end
         function setVarianceFitDisplacementCuttoff(this, cuttoff)
             this.varianceFitDisplacementCuttoff = cuttoff;
+        end
+        % Function sets the parameters for the ExpFunction
+        function setExpFunc(this, expFunction)
+            this.expFunction = expFunction;
+        end
+        
+        %Function returns the expFunction
+        function expFunc = getExpFunc(this)
+            if (isempty(this.expFunction))
+                warning('ExpFunction no yet defined for MainModel');
+            end
+            expFunc = this.expFunction;
         end
         % TO DO
         % Done: Add probe object to MainModel and intialize is
