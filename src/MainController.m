@@ -149,6 +149,9 @@ classdef MainController < handle
         function setExpFunc(this, expFunction)
             this.model.expFunction = expFunction;
         end
+        function setTargetDisplacement(this, displacement)
+            this.model.setTargetDisplacement(displacement);
+        end
     end
     
 end

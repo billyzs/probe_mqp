@@ -1,6 +1,6 @@
 classdef ExpFunction < handle
     %EXPFUNCTION A class representing a first order exponential function
-    %   Detailed explanation goes here
+    %   y = Ae^(Bx) + y_0
     
     properties
         a = 0;
@@ -18,6 +18,11 @@ classdef ExpFunction < handle
         
         function y = getY(this, x)
             y = this.a*exp(this.b*x) + this.y_0;
+        end
+         
+        function x = getX(this, y)
+            % x = log(y-y_0 / a) / b
+            x = log((y - this.y_0) / this.a) / this.b;
         end
         
         function [ A, B, y_0] = estimateExp(this, y, x, y_0, updateSelf)

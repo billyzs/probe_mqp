@@ -47,7 +47,7 @@ classdef MirrorDriver < Equipment
         end
         
         function setFringesEnabled(this, enabled)
-            this.daqObject.outputSingleScan(~enabled);
+            this.daqObject.outputSingleScan(enabled);
         end
     end
     

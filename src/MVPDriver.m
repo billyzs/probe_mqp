@@ -195,7 +195,17 @@ classdef MVPDriver < MotorDriver
         % Function returns the current displacement converted from encoder
         % ticks into um
         function um = getDisplacementUM(this)
-            um = this.getDisplacement() * this.umPerCount;
+            um = this.umFromTicks(this.getDisplacement());
+        end
+        
+        % Function to convert uM to ticks
+        function ticks = ticksFromUm(this, um)
+            ticks = um / this.umPerCount;
+        end
+        
+        % Function to convert ticks to um
+        function um = umFromTicks(this, ticks)
+            um = ticks * this.umPerCount;
         end
     end
 

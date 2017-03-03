@@ -30,14 +30,6 @@ classdef NewportDriver < MotorDriver
     end
     
     methods (Access=private)
-        % Function to establish connection to the driver library
-        function connect(this)
-            if (~libisloaded(this.driverLibrary))
-                [notfound,warnings] = loadlibrary(this.driverLibrary);
-                [error] = calllib(this.driverLibrary,'esp_init_system');
-                this.catchAndPrintError(error);
-            end
-        end
         
         % Function to enable the motors for all axis
         function enableMotor(this)
@@ -62,9 +54,7 @@ classdef NewportDriver < MotorDriver
         % Destructor
         function delete(this)
             this.disable();
-            if (libisloaded(this.driverLibrary))
-                unloadlibrary(this.driverLibrary)
-            end
+            this.disconnect();
         end
         
         % Function to enable the motor hardware
@@ -82,6 +72,22 @@ classdef NewportDriver < MotorDriver
             catch exception
                 clear obj;
                 rethrow(exception);
+            end
+        end
+        
+        % Function to release connection to the driver library
+        function disconnect(this)
+            if (libisloaded(this.driverLibrary))
+                unloadlibrary(this.driverLibrary)
+            end
+        end
+        
+        % Function to establish connection to the driver library
+        function connect(this)
+            if (~libisloaded(this.driverLibrary))
+                [notfound,warnings] = loadlibrary(this.driverLibrary);
+                [error] = calllib(this.driverLibrary,'esp_init_system');
+                this.catchAndPrintError(error);
             end
         end
         

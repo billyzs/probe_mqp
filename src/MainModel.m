@@ -21,6 +21,7 @@ classdef MainModel < handle
         varianceThreshold = 30;
         varianceFitDisplacementCuttoff = -1500;
         expFunction;
+        targetDisplacement = 0;
     end
     properties (Constant)
         %Constants
@@ -156,6 +157,38 @@ classdef MainModel < handle
             this.camera = camera;
         end
         
+        function initializeCamera(this, cameraType, view)
+            switch cameraType
+                case 'webcam'
+                    this.setCamera(CameraWebcam(1, 'MJPG_640x480'));
+                case 'gentl'
+                    this.setCamera(CameraPike(1));
+                    %this.model.setCamera(CameraPike(1));
+            end
+            this.camera.setVideoParameter('FramesPerTrigger', 1);
+            this.camera.setVideoParameter('TriggerFcn', @view.previewFrameCallback);
+            this.camera.setVideoParameter('TriggerRepeat', Inf);
+            this.camera.setVideoParameter('FrameGrabInterval', 2);
+            %camera.setVideoParameter('TriggerFrameDelay', .04);
+        end
+        
+        function setCameraActive(this, active)
+            if (~isempty(this.camera))
+                if (active)
+                    this.camera.start();
+                else
+                    this.camera.stop
+                end
+                this.cameraActive = active;
+            else
+                this.cameraActive = false;
+            end
+        end
+        
+        function active = cameraIsActive(this)
+            active = this.cameraActive;
+        end
+        
         function captureImage(this, path)
             if (this.cameraActive == true && ~isempty(this.camera) && ~isempty(path))
                 im = this.camera.getImageData();
@@ -261,8 +294,11 @@ classdef MainModel < handle
         
         function startProbingSequence(this)
             this.camera.stop();
+            pause(0.1);
             this.probe.connect();
+            pause(0.1);
             this.camera.start();
+            pause(0.1);
             this.probe.updateNoLoadVoltage();
             this.probeCurrentPoint();
             return
@@ -297,6 +333,10 @@ classdef MainModel < handle
                 return
             end
            
+            %
+            this.targetDisplacement
+            %
+            
             'Starting approach'
             % Pre devices
             
@@ -316,7 +356,7 @@ classdef MainModel < handle
             %this.newportDriver.setActiveAxis(2);
             y = this.homePoint(2);
             
-            target = -18000; %ticks
+            target = this.mvpDriver.ticksFromUm(this.targetDisplacement); %ticks
             
             % Create data object
             data = zeros(100,6); % Sec, uN, x in um, y in um, z coarse, z fine
@@ -369,15 +409,30 @@ classdef MainModel < handle
             
             % Update parameters
             fineStep = 1; %um
-            courseStep = 10; %NA displacement units
+            courseStep = -20; %NA displacement units
             inContact = false;
             % Prep motors
             this.setActiveMotor('Piezo');
             this.setActiveMotorMoveMode('Relative');
             % Final approach
             while(~inContact)
+                 this.probe.collectData();
+                % Check if contact made and record data
+                meanForce = this.probe.getMeanForce()
+                data(index, :) = ...
+                    [toc, meanForce, x, y,...
+                    this.mvpDriver.getDisplacement(),...
+                    this.aptDriver.getDisplacement()];
+                if (abs(meanForce) >  forceThreshold)
+                    inContact = true;
+                    try
+                        this.moveActiveMotor(-fineStep);
+                    catch
+                    end
+                    break;
+                end 
                 % Step fine actuator
-                if this.aptDriver.getDisplacement() + fineStep > this.aptDriver.getMaxDisplacement()
+                if this.aptDriver.getDisplacement() + fineStep > 0.5 * this.aptDriver.getMaxDisplacement()
                     moveValid = false;
                 else 
                     moveValid = this.moveActiveMotor(fineStep);
@@ -387,6 +442,7 @@ classdef MainModel < handle
                     warning('Fine actuator cannot make desired move. Using course actuator.');
                     this.aptDriver.moveHome();
                     this.setActiveMotor('National Aperture');
+                    this.setActiveMotorMoveMode('Relative');
                     stepModeValid = this.moveActiveMotor(courseStep);
                     if (~stepModeValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');
@@ -396,30 +452,20 @@ classdef MainModel < handle
                     this.setActiveMotor('Piezo');
                     this.setActiveMotorMoveMode('Relative');
                 end
-                this.probe.collectData();
-                % Check if contact made and record data
-                meanForce = this.probe.getMeanForce();
-                data(index, :) = ...
-                    [toc, meanForce, x, y,...
-                    this.mvpDriver.getDisplacement(),...
-                    this.aptDriver.getDisplacement()];
-                if (meanForce >  forceThreshold)
-                    inContact = true;
-                end 
             end
             % Contact Made
             % Apply force then let settle then retract
             fineStep = 0.2; %um
             % The piezo is down as positive and negative going up
             pause(0.1);
-            
+            'Contact Made'
             for step = 1:10
                 this.probe.collectData();
-                meanForce = this.probe.getMeanForce();
-                if (meanForce > 3 * forceThreshold)
+                meanForce = this.probe.getMeanForce()
+                if (abs(meanForce) > 3 * forceThreshold)
                     warning('Force too high returning home');
                     this.aptDriver.moveHome();
-                    return;
+                    break;
                 end
                 data(index, :) = ...
                     [toc, meanForce, x, y,...
@@ -436,6 +482,10 @@ classdef MainModel < handle
             this.disableProbe();
             % Complete
             % Do something with data !!!
+            figure;
+            plot(data(:,6), data(:,2), '.');
+            xlabel('Displacement on piezo (um)');
+            ylabel('Force (uN)');
         end
         
         function showLiveForce(this)
@@ -477,6 +527,14 @@ classdef MainModel < handle
                 warning('ExpFunction no yet defined for MainModel');
             end
             expFunc = this.expFunction;
+        end
+        
+        function enabled = getMotorsEnabled(this)
+            enabled = this.motorsEnabled;
+        end
+        
+        function setTargetDisplacement(this, displacement)
+            this.targetDisplacement = displacement;
         end
         % TO DO
         % Done: Add probe object to MainModel and intialize is
