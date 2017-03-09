@@ -165,12 +165,15 @@ classdef MainView < handle
                 this.recordingVideo = false; % Needs to happen before fclose
                 % Close the file.
                 fclose(this.vidID);
-                selection = questdlg(sprintf(['Would you like to save the video as an AVI now?\n'...
-                    'Warning saving large AVI files can cause memory overloads on 32bit systems']),...
-                    'Save Later', 'Save Later', 'Save Now', 'Save Now');
+                selection = this.jFrame.YesNoDialog('Save File?', ['Would you like to save the video as an AVI now?\n'...
+                    'Warning saving large AVI files can cause memory overloads on 32bit systems'],...
+                    'Save Later', 'Save Now');
+%                 selection = questdlg(sprintf(['Would you like to save the video as an AVI now?\n'...
+%                     'Warning saving large AVI files can cause memory overloads on 32bit systems']),...
+%                     'Save Later', 'Save Later', 'Save Now', 'Save Now');
                 drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
 
-                if strcmp(selection, 'Save Now')
+                if selection == 1
                     this.captureVideoButton.setText('Saving...');
                     this.model.setCameraActive(false);
                     VideoFromBinary(this.vidPath, 24, [1000, 1000]);
@@ -397,8 +400,10 @@ classdef MainView < handle
                         this.model.updateTemplateFromROI();
                         this.setSystemState(SystemState.PROBE_REGION_SELECTION);
                     case SystemState.PROBE_REGION_SELECTION
-                        msgbox(sprintf(['Probe Selection Completed\n'...
-                        'Use the jog buttons to make contact with the device.']),'Contact Step');
+                        this.jFrame.MsgDialog('Contact Step', ['Probe Selection Completed\n'...
+                        'Use the jog buttons to make contact with the device.']);
+%                         msgbox(sprintf(['Probe Selection Completed\n'...
+%                         'Use the jog buttons to make contact with the device.']),'Contact Step');
                         drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
                         this.setSystemState(SystemState.VARIANCE_CALIBRATION);
                         %ROI for the probe should already be set at this
@@ -467,8 +472,10 @@ classdef MainView < handle
             this.updatingROI = false; %User will click SetROI to start update
             this.hasClickedOnImage = false;
             this.roiButton.setText('Set Probe ROI');
-            msgbox(sprintf(['Template Selection Completed\n'...
-                'Select the probe in the image.']),'Probe Selection');
+            this.jFrame.MsgDialog('Probe Selection', ['Template Selection Completed\n'...
+                'Select the probe in the image.']);
+%             msgbox(sprintf(['Template Selection Completed\n'...
+%                 'Select the probe in the image.']),'Probe Selection');
             drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
         end
         
@@ -480,9 +487,11 @@ classdef MainView < handle
 %             'Load existing template from file or indicate template on camera feed?']),...
 %             'Template Selection', 'Load Template', 'Select From Feed', 'Select From Feed');
 %             drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
-            selection = 'Select From Feed';
+            selection = this.jFrame.YesNoDialog('Template Selection', ['A Template Image is needed would you like to:\n'...
+                'Load existing template from file or indicate template on camera feed?'],...
+                'Load Template', 'Select From Feed'); % 0 = yes, 1 = no, -1 = cancel
             selectFromFeed = false;
-            if strcmp(selection, 'Load Template')
+            if selection == 0
                 'Load Template'
                 [FileName,PathName,FilterIndex] = uigetfile({...
                     '*.png; *.jpg; *.bmp; *.tiff; *.tif',...
