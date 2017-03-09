@@ -165,8 +165,8 @@ classdef MainView < handle
                 this.recordingVideo = false; % Needs to happen before fclose
                 % Close the file.
                 fclose(this.vidID);
-                selection = this.jFrame.YesNoDialog('Save File?', ['Would you like to save the video as an AVI now?\n'...
-                    'Warning saving large AVI files can cause memory overloads on 32bit systems'],...
+                selection = this.jFrame.YesNoDialog('Save File?', sprintf(['Would you like to save the video as an AVI now?\n'...
+                    'Warning saving large AVI files can cause memory overloads on 32bit systems']),...
                     'Save Later', 'Save Now');
 %                 selection = questdlg(sprintf(['Would you like to save the video as an AVI now?\n'...
 %                     'Warning saving large AVI files can cause memory overloads on 32bit systems']),...
@@ -190,41 +190,45 @@ classdef MainView < handle
                 case SystemState.JOG
                     this.setSystemState(SystemState.TEMPLATE_SELECTION);
                 case SystemState.VARIANCE_CALIBRATION
-                    if (this.getVarianceFromUser())
-                        this.setSystemState(SystemState.JOG);
-                    end
+% Delete Soon
+%                     if (this.getVarianceFromUser())
+%                         this.setSystemState(SystemState.JOG);
+%                     end
+                      this.getVarianceFromUser();
+                      this.setSystemState(SystemState.JOG);
             end
         end
         
         function validInput = getVarianceFromUser(this)
-            prompt={'Enter the variance threshold value',...
-                'Enter the displacement cuttoff value in um'};
-            name = 'Variance Threshold';
-            defaultans = {'30', '-1500'};
-            inputLines = 1;
-            inputWidth = 40;
-            values = inputdlg(prompt,name,...
-                [inputLines inputWidth; inputLines inputWidth],defaultans);
-            drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
-            if (isequal(values, {}))
-                validInput = false;
-                return;
-            end
-            validInput = true;
-            this.model.setVarianceThreshold(str2double(values(1)));
-            this.model.setVarianceFitDisplacementCuttoff(str2double(values(2)));
-            
-            if (this.varianceDataIndex > 1)
-                data = this.varianceCalibrationData(1:this.varianceDataIndex, :);
-                columnMask = data(:,1) < str2double(values(2));
-                data = data([columnMask, columnMask]);
-                data = reshape(data, [],2);
-                sizeData = size(data)
-                if sizeData(1) < 2
-                    warning(['Not enough points (<2) collected to calculate function.'...
-                    ' Suggest recalibrating.']);
-                    return;
-                end
+%!!! Delete soon
+%             prompt={'Enter the variance threshold value',...
+%                 'Enter the displacement cuttoff value in um'};
+%             name = 'Variance Threshold';
+%             defaultans = {'30', '-1500'};
+%             inputLines = 1;
+%             inputWidth = 40;
+%             values = inputdlg(prompt,name,...
+%                 [inputLines inputWidth; inputLines inputWidth],defaultans);
+%             drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
+%             if (isequal(values, {}))
+%                 validInput = false;
+%                 return;
+%             end
+%             validInput = true;
+%             this.model.setVarianceThreshold(str2double(values(1)));
+%             this.model.setVarianceFitDisplacementCuttoff(str2double(values(2)));
+%             
+%             if (this.varianceDataIndex > 1)
+%                 data = this.varianceCalibrationData(1:this.varianceDataIndex, :);
+%                 columnMask = data(:,1) < str2double(values(2));
+%                 data = data([columnMask, columnMask]);
+%                 data = reshape(data, [],2);
+%                 sizeData = size(data)
+%                 if sizeData(1) < 2
+%                     warning(['Not enough points (<2) collected to calculate function.'...
+%                     ' Suggest recalibrating.']);
+%                     return;
+%                 end
 %                 expFunc = ExpFunction(0,0,0);
 %                 this.model.setCameraActive(false);
 %                 expFunc.estimateExp( data(:,2), data(:,1), data(1,2), true);
@@ -237,12 +241,13 @@ classdef MainView < handle
 %                 targetDisplacement = real(expFunc.getX(str2double(values(1))));
 %                 this.model.setTargetDisplacement(targetDisplacement);
                 %!!!
-                this.model.setTargetDisplacement(data(end,1));
+                displacements = this.model.getDisplacements();
+                this.model.setTargetDisplacement(displacements(1));
                 %!!!
-            else
-                warning(['Not enough points (<2) collected to calculate function.'...
-                    ' Suggest recalibrating.']);
-            end
+%             else
+%                 warning(['Not enough points (<2) collected to calculate function.'...
+%                     ' Suggest recalibrating.']);
+%             end
         end
         
         function positionTextFieldCallback(this, hObject, hEventData)
@@ -335,22 +340,23 @@ classdef MainView < handle
         function takeStateAction(this)
             switch this.systemState
                 case SystemState.VARIANCE_CALIBRATION
-                    if (~isempty(this.varFig) && ishandle(this.varFig) ...
-                            && strcmp(get(this.varFig, 'type'), 'figure'))
-                        figure(this.varFig);
-                    else
-                        this.varFig = figure;
-                    end
-                    displacements = this.model.getDisplacements();
-                    roi = this.model.getROI(ROI.PROBE);
-                    probeImg = this.activeImage(roi(2):roi(4), roi(1):roi(3));
-                    this.varianceCalibrationData(this.varianceDataIndex, 1) = displacements(1);
-                    this.varianceCalibrationData(this.varianceDataIndex, 2) = VarianceOfLaplacian(probeImg);
-                    plot(this.varianceCalibrationData(:,1), this.varianceCalibrationData(:,2), '.');
-                    title('Variance vs NA Displacement');
-                    xlabel('Displacement (um)');
-                    ylabel('Variance of Laplacian');
-                    this.varianceDataIndex = this.varianceDataIndex + 1;
+%!!! Delete soon
+%                     if (~isempty(this.varFig) && ishandle(this.varFig) ...
+%                             && strcmp(get(this.varFig, 'type'), 'figure'))
+%                         figure(this.varFig);
+%                     else
+%                         this.varFig = figure;
+%                     end
+%                     displacements = this.model.getDisplacements();
+%                     roi = this.model.getROI(ROI.PROBE);
+%                     probeImg = this.activeImage(roi(2):roi(4), roi(1):roi(3));
+%                     this.varianceCalibrationData(this.varianceDataIndex, 1) = displacements(1);
+%                     this.varianceCalibrationData(this.varianceDataIndex, 2) = VarianceOfLaplacian(probeImg);
+%                     plot(this.varianceCalibrationData(:,1), this.varianceCalibrationData(:,2), '.');
+%                     title('Variance vs NA Displacement');
+%                     xlabel('Displacement (um)');
+%                     ylabel('Variance of Laplacian');
+%                     this.varianceDataIndex = this.varianceDataIndex + 1;
             end 
         end
         function motorsEnableButtonCallback(this, hObject, hEventData)
@@ -400,8 +406,8 @@ classdef MainView < handle
                         this.model.updateTemplateFromROI();
                         this.setSystemState(SystemState.PROBE_REGION_SELECTION);
                     case SystemState.PROBE_REGION_SELECTION
-                        this.jFrame.MsgDialog('Contact Step', ['Probe Selection Completed\n'...
-                        'Use the jog buttons to make contact with the device.']);
+                        this.jFrame.MsgDialog('Contact Step', sprintf(['Probe Selection Completed\n'...
+                        'Use the jog buttons to make contact with the device.']));
 %                         msgbox(sprintf(['Probe Selection Completed\n'...
 %                         'Use the jog buttons to make contact with the device.']),'Contact Step');
                         drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
@@ -472,8 +478,8 @@ classdef MainView < handle
             this.updatingROI = false; %User will click SetROI to start update
             this.hasClickedOnImage = false;
             this.roiButton.setText('Set Probe ROI');
-            this.jFrame.MsgDialog('Probe Selection', ['Template Selection Completed\n'...
-                'Select the probe in the image.']);
+            this.jFrame.MsgDialog('Probe Selection', sprintf(['Template Selection Completed\n'...
+                'Select the probe in the image.']));
 %             msgbox(sprintf(['Template Selection Completed\n'...
 %                 'Select the probe in the image.']),'Probe Selection');
             drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
@@ -483,13 +489,15 @@ classdef MainView < handle
             if this.model.cameraIsActive() == false
             	this.startCameraButtonCallback();
             end
+%!!! delete soon
 %             selection = questdlg(sprintf(['A Template Image is needed would you like to:\n'...
 %             'Load existing template from file or indicate template on camera feed?']),...
 %             'Template Selection', 'Load Template', 'Select From Feed', 'Select From Feed');
-%             drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
-            selection = this.jFrame.YesNoDialog('Template Selection', ['A Template Image is needed would you like to:\n'...
-                'Load existing template from file or indicate template on camera feed?'],...
+%             
+            selection = this.jFrame.YesNoDialog('Template Selection', sprintf(['A Template Image is needed would you like to:\n'...
+                'Load existing template from file or indicate template on camera feed?']),...
                 'Load Template', 'Select From Feed'); % 0 = yes, 1 = no, -1 = cancel
+            drawnow; pause(0.05);  % Use this after every dialog to prevent Matlab hang
             selectFromFeed = false;
             if selection == 0
                 'Load Template'
@@ -540,7 +548,7 @@ classdef MainView < handle
                     this.jogYNegButton.setEnabled(          true);
                     this.jogYPosButton.setEnabled(          true);
                     this.cameraLabel.setEnabled(            true);
-                    this.roiButton.setEnabled(              true);
+                    this.roiButton.setEnabled(              false);
                     this.calibrationModeButton.setEnabled(  true);
                 case {SystemState.TEMPLATE_SELECTION, SystemState.PROBE_REGION_SELECTION}
                     this.startCameraButton.setEnabled(      false);

@@ -346,6 +346,7 @@ classdef MainModel < handle
             this.setActiveMotorMoveMode('Relative');
             % Set parameters
             courseStep = -500;
+            secPerTick = 0.0001; %sec National aperature movement time, actual 0.00008
             forceThreshold = 20; %uN
             %this.varianceThreshold = 48; %TBD
             roi = this.getROI(ROI.PROBE);
@@ -398,6 +399,7 @@ classdef MainModel < handle
                     %step = max(20, min(5000, 1 * (this.varianceThreshold - variance)^3))
                     step = max(8, 0.6 * error)
                     moveValid = this.moveActiveMotor(-step);
+                    pause(step * secPerTick);
                     if (~moveValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');
                         this.mvpDriver.moveHome();
@@ -406,7 +408,7 @@ classdef MainModel < handle
                 end
                 index = index+1;
             end
-            
+            return;
             % Update parameters
             fineStep = 1; %um
             courseStep = -20; %NA displacement units
@@ -537,18 +539,17 @@ classdef MainModel < handle
             this.targetDisplacement = displacement;
         end
         % TO DO
-        % Done: Add probe object to MainModel and intialize is
-        % Done: Add moveHome method to MotorDriver
-        % Done: Confirm Relative motion on piezo
-        % Done: Confirm getDisplacement on NA and Piezo
-        % Done: Get X and Y location for national aperature stages
-        % Done: Clean up approach function
-        % Split code into functions
-        % Done: Sorta Do ne: Develop testing method that can be done with the needle.
-        % Attach probe and get images of probe over device and on approach
-        % Implement Billy's probe auto detection method in matlab
-        % Develop method for moving to next X,Y probing location
-        % Fix national aperature displacement readings
+        % (Done) Change non-file dialogs to java 
+        % (Done) Disable set ROI button in Jog mode
+        % (Done) Remove dialog at end of calibration
+        % Open new chip
+        % Calibrate interferometer for new chip
+        % Run tests
+        % Add dialog for selecting probe location
+        % Move device back a bit when contact is made
+        % Clean up variance code in MainView
+        % Implement full device test
+        % Test on full device
         
     end
 end

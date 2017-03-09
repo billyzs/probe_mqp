@@ -1,24 +1,28 @@
 
-clear
-% CleanUpMemory()
-addpath('src')
+clear;
 imaqreset;
-mvpDriver = MVPDriver(1, 'COM4');
+% CleanUpMemory()
+addpath('src');
+
+newportDriver = NewportDriver(3);
+newportDriver.enable();
+newportDriver.disable();
 
 aptDriver = APTDriver();
 pause(4);
+
+probe = ForceProbe();
+probe.connect();
+probe.disconnect();
+
+mvpDriver = MVPDriver(1, 'COM4');
+
+
 %mvpDriver.enable();
 % aptStrainGuage = APTStrainGuage(84813062);
 % aptStrainGuage.identify();
 % Enable and disable the newport and force probe early to prevent hangs in
 % code during runtime.
-newportDriver = NewportDriver(3);
-newportDriver.enable();
-newportDriver.disable();
-
-probe = ForceProbe();
-probe.connect();
-probe.disconnect();
 
 % 
 
