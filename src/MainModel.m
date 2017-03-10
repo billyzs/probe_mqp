@@ -229,7 +229,7 @@ classdef MainModel < handle
         
         function moveToHomeXY(this)
             this.homeOffset = [0, 0];
-            this.moveToImageXY(312,468)
+            this.moveToImageXY(706,385)
             %Here would be where we check if the movement was successful
         end
         
@@ -300,10 +300,10 @@ classdef MainModel < handle
             this.camera.start();
             pause(0.1);
             this.probe.updateNoLoadVoltage();
-            this.probeCurrentPoint();
-            return
+            %this.probeCurrentPoint();
+            %return
             'Sequence'
-            samplesPerSide = [5,5]; %5 x 5 sample square
+            samplesPerSide = [2,2]; %5 x 5 sample square
             regionDim = [300, 300]; %um
             buffer = 30; %um
             searchDim = regionDim - buffer;
@@ -322,6 +322,7 @@ classdef MainModel < handle
                     this.moveToImageXY(target(1),target(2));
                     this.homePoint(:) = target(:);
                     pause(0.5); %!!!
+		    this.probeCurrentPoint();
                 end
             end
             %Place multi point code here
@@ -408,9 +409,8 @@ classdef MainModel < handle
                 end
                 index = index+1;
             end
-            return;
             % Update parameters
-            fineStep = 1; %um
+            fineStep = 0.5; %um
             courseStep = -20; %NA displacement units
             inContact = false;
             % Prep motors
@@ -464,7 +464,7 @@ classdef MainModel < handle
             for step = 1:10
                 this.probe.collectData();
                 meanForce = this.probe.getMeanForce()
-                if (abs(meanForce) > 3 * forceThreshold)
+                if (abs(meanForce) > 4 * forceThreshold)
                     warning('Force too high returning home');
                     this.aptDriver.moveHome();
                     break;
@@ -542,6 +542,7 @@ classdef MainModel < handle
         % (Done) Change non-file dialogs to java 
         % (Done) Disable set ROI button in Jog mode
         % (Done) Remove dialog at end of calibration
+        % (Done) Ensure that p controller works
         % Open new chip
         % Calibrate interferometer for new chip
         % Run tests
