@@ -348,7 +348,7 @@ classdef MainModel < handle
             % Set parameters
             courseStep = -500;
             secPerTick = 0.0001; %sec National aperature movement time, actual 0.00008
-            forceThreshold = 20; %uN
+            forceThreshold = 5; %uN
             %this.varianceThreshold = 48; %TBD
             roi = this.getROI(ROI.PROBE);
             inPiezoRange = false;
