@@ -36,6 +36,22 @@ classdef ForceProbe < Equipment
             this.connected = true;
         end
         
+        function runContinuous(this, rate, notificationCount)
+            this.daqObject.addlistener('DataAvailable', @(src,event) plot(event.TimeStamps, event.Data))
+            this.setSampleCount(rate);
+            this.daqObject.NotifyWhenDataAvailableExceeds = notificationCount;
+            this.daqObject.IsContinuous = true;
+            figure;
+            xlabel('time (seconds)');
+            ylabel('Voltage (V)');
+            title('Voltage from a FS-1000 LAT Probe')
+            this.daqObject.startBackground;
+        end
+        
+        function stopContinuous(this)
+            stop(this.daqObject);
+        end
+        
         function daqObject = getDAQObject(this)
             daqObject = this.daqObject;
         end

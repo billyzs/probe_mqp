@@ -203,7 +203,7 @@ classdef MainModel < handle
         end
         
         function loadTemplate(this, path)
-            this.template = imread(path);
+            this.template = rgb2gray(imread(path));
         end
         
         function identifyHomePoint(this)
@@ -229,7 +229,7 @@ classdef MainModel < handle
         
         function moveToHomeXY(this)
             this.homeOffset = [0, 0];
-            this.moveToImageXY(706,385)
+            this.moveToImageXY(735,421)
             %Here would be where we check if the movement was successful
         end
         
@@ -300,11 +300,11 @@ classdef MainModel < handle
             this.camera.start();
             pause(0.1);
             this.probe.updateNoLoadVoltage();
-            %this.probeCurrentPoint();
-            %return
+            this.probeCurrentPoint();
+            return;
             'Sequence'
             samplesPerSide = [2,2]; %5 x 5 sample square
-            regionDim = [300, 300]; %um
+            regionDim = [309, 309]; %um
             buffer = 30; %um
             searchDim = regionDim - buffer;
             center = [searchDim(1)/2, searchDim(2)/2];
@@ -346,16 +346,11 @@ classdef MainModel < handle
             this.setActiveMotor('National Aperture');
             this.setActiveMotorMoveMode('Relative');
             % Set parameters
-            courseStep = -500;
             secPerTick = 0.0001; %sec National aperature movement time, actual 0.00008
-            forceThreshold = 5; %uN
-            %this.varianceThreshold = 48; %TBD
-            roi = this.getROI(ROI.PROBE);
-            inPiezoRange = false;
-            % Get constant data points
-            %this.newportDriver.setActiveAxis(3);
+            forceThreshold = 3; %uN
+            inPiezoRange = false;   
+            
             x = this.homePoint(1);
-            %this.newportDriver.setActiveAxis(2);
             y = this.homePoint(2);
             
             target = this.mvpDriver.ticksFromUm(this.targetDisplacement); %ticks
@@ -364,7 +359,7 @@ classdef MainModel < handle
             data = zeros(100,6); % Sec, uN, x in um, y in um, z coarse, z fine
             index = 1;
             % Start approach timer
-            timeout = 1000;
+            timeout = 60;
             tic;
             % Course actuation
             while(~inPiezoRange)
@@ -398,7 +393,7 @@ classdef MainModel < handle
                     % Min = 10um = 80 ticks, Max = 500um = 4032 ticks
                     %step = max(80, min(4032, 50 * (this.varianceThreshold - variance)))
                     %step = max(20, min(5000, 1 * (this.varianceThreshold - variance)^3))
-                    step = max(8, 0.6 * error)
+                    step = floor(max(8, 0.6 * error))
                     moveValid = this.moveActiveMotor(-step);
                     pause(step * secPerTick);
                     if (~moveValid)
@@ -409,9 +404,10 @@ classdef MainModel < handle
                 end
                 index = index+1;
             end
+	    'In Range'
             % Update parameters
-            fineStep = 0.5; %um
-            courseStep = -20; %NA displacement units
+            fineStep = 0.1; %um
+            courseStep = floor(this.mvpDriver.ticksFromUm(2)); % move 2um
             inContact = false;
             % Prep motors
             this.setActiveMotor('Piezo');
@@ -426,15 +422,23 @@ classdef MainModel < handle
                     this.mvpDriver.getDisplacement(),...
                     this.aptDriver.getDisplacement()];
                 if (abs(meanForce) >  forceThreshold)
+                    if (this.aptDriver.getDisplacement() < 1)
+                        this.setActiveMotor('National Aperture');
+                        this.setActiveMotorMoveMode('Relative');
+                        this.moveActiveMotor(floor(courseStep / 2));
+                        this.setActiveMotor('Piezo');
+                        this.setActiveMotorMoveMode('Relative');
+                        continue;
+                    end
                     inContact = true;
                     try
-                        this.moveActiveMotor(-fineStep);
+                        this.moveActiveMotor(-3 * fineStep);
                     catch
                     end
                     break;
                 end 
                 % Step fine actuator
-                if this.aptDriver.getDisplacement() + fineStep > 0.5 * this.aptDriver.getMaxDisplacement()
+                if this.aptDriver.getDisplacement() + fineStep > 0.75 * this.aptDriver.getMaxDisplacement()
                     moveValid = false;
                 else 
                     moveValid = this.moveActiveMotor(fineStep);
@@ -445,7 +449,7 @@ classdef MainModel < handle
                     this.aptDriver.moveHome();
                     this.setActiveMotor('National Aperture');
                     this.setActiveMotorMoveMode('Relative');
-                    stepModeValid = this.moveActiveMotor(courseStep);
+                    stepModeValid = this.moveActiveMotor(-courseStep);
                     if (~stepModeValid)
                         warning('Course actuator cannot make desired move. No contact made. Returning to home.');
                         this.mvpDriver.moveHome();
@@ -457,14 +461,15 @@ classdef MainModel < handle
             end
             % Contact Made
             % Apply force then let settle then retract
-            fineStep = 0.2; %um
+            fineStep = 0.05; %um
             % The piezo is down as positive and negative going up
             pause(0.1);
             'Contact Made'
+            contactIndex = index;
             for step = 1:10
                 this.probe.collectData();
                 meanForce = this.probe.getMeanForce()
-                if (abs(meanForce) > 4 * forceThreshold)
+                if (abs(meanForce) > 8 * forceThreshold)
                     warning('Force too high returning home');
                     this.aptDriver.moveHome();
                     break;
@@ -480,14 +485,22 @@ classdef MainModel < handle
             % Retract and complete sample
             this.aptDriver.moveHome();
             pause(.1);
-            %this.mvpDriver.moveHome();
+            this.mvpDriver.moveHome();
             this.disableProbe();
             % Complete
             % Do something with data !!!
             figure;
-            plot(data(:,6), data(:,2), '.');
+            plot(data(contactIndex:end,6), data(contactIndex:end,2), '.');
             xlabel('Displacement on piezo (um)');
             ylabel('Force (uN)');
+            title('Force vs Displacement');
+            grid on;
+	    figure;
+            plot(data(contactIndex:end,1), data(contactIndex:end,2));
+            xlabel('Time (s)');
+            ylabel('Force (uN)');
+            title('Force vs Time');
+            grid on;
         end
         
         function showLiveForce(this)
