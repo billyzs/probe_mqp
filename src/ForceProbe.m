@@ -8,10 +8,12 @@ classdef ForceProbe < Equipment
     
     properties(Access=private)
         daqObject
-        dataSample
-        forceGain = 500; %uN/V
+        dataSample;% = zeros(1,500);
+        forceGain = 500.3; %uN/V
         noLoadVoltage = 2.16;
         connected = false;
+        dataIndex = 1;
+        graphFigure;
     end
     
     methods
@@ -29,9 +31,10 @@ classdef ForceProbe < Equipment
                 release(this.daqObject)
             end
             this.daqObject = daq.createSession('ni');
-            this.daqObject.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
-            %Sample at 100 Hz
-            this.setSampleCount(100);
+            ch = this.daqObject.addAnalogInputChannel('Dev5', 'ai1', 'Voltage');
+            ch.Range = [-2.5,2.5];
+            %Sample at 1000 Hz
+            this.setSampleCount(1000);
             this.setSampleDuration(.1);
             this.connected = true;
         end
@@ -39,17 +42,32 @@ classdef ForceProbe < Equipment
         function runContinuous(this, rate, notificationCount)
             this.daqObject.addlistener('DataAvailable', @(src,event) plot(event.TimeStamps, event.Data))
             this.setSampleCount(rate);
-            this.daqObject.NotifyWhenDataAvailableExceeds = notificationCount;
-            this.daqObject.IsContinuous = true;
-            figure;
+            this.graphFigure = figure;
+            figure(this.graphFigure);
             xlabel('time (seconds)');
             ylabel('Voltage (V)');
             title('Voltage from a FS-1000 LAT Probe')
+            this.daqObject.NotifyWhenDataAvailableExceeds = notificationCount;
+            this.daqObject.IsContinuous = true;
             this.daqObject.startBackground;
         end
         
+        function handleData(this, src, event)
+            figure(this.graphFigure);
+%             this.dataSample(dataIndex) = sum(event.Data) / this.daqObject.NotifyWhenDataAvailableExceeds;
+            plot(event.TimeStamps, event.Data);
+%             dataIndex = dataIndex + 1;
+%             dataSize = size(this.dataSample);
+%             if (dataIndex == dataSize(2))
+%                 %write to disk
+%                 %flush array
+%                 dataIndex = 0;
+%             end
+        end 
+        
         function stopContinuous(this)
             stop(this.daqObject);
+            this.daqObject.IsContinuous = false;
         end
         
         function daqObject = getDAQObject(this)
@@ -73,6 +91,7 @@ classdef ForceProbe < Equipment
         end
         
         function [data,time] = collectData(this)
+           % pause(0.3);
             [data,time] = this.daqObject.startForeground;
             this.dataSample = [data,time];
         end

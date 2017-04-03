@@ -293,6 +293,7 @@ classdef MainModel < handle
         end
         
         function startProbingSequence(this)
+	    'Probe'
             this.camera.stop();
             pause(0.1);
             this.probe.connect();
@@ -356,11 +357,13 @@ classdef MainModel < handle
             target = this.mvpDriver.ticksFromUm(this.targetDisplacement); %ticks
             
             % Create data object
-            data = zeros(100,6); % Sec, uN, x in um, y in um, z coarse, z fine
+            data = zeros(600,6); % Sec, uN, x in um, y in um, z coarse, z fine
             index = 1;
             % Start approach timer
             timeout = 60;
             tic;
+
+
             % Course actuation
             while(~inPiezoRange)
                 if (toc >  timeout)
@@ -404,7 +407,8 @@ classdef MainModel < handle
                 end
                 index = index+1;
             end
-	    'In Range'
+            'In Range'
+            this.probe.updateNoLoadVoltage();
             % Update parameters
             fineStep = 0.1; %um
             courseStep = floor(this.mvpDriver.ticksFromUm(2)); % move 2um
@@ -461,15 +465,29 @@ classdef MainModel < handle
             end
             % Contact Made
             % Apply force then let settle then retract
-            fineStep = 0.05; %um
+            fineStep = 0.005; %um
             % The piezo is down as positive and negative going up
             pause(0.1);
             'Contact Made'
             contactIndex = index;
-            for step = 1:10
+
+            for i = 1:100
+                    this.probe.collectData();
+                    meanForce = this.probe.getMeanForce();
+                    data(index, :) = ...
+                        [toc, meanForce, x, y,...
+                        this.mvpDriver.getDisplacement(),...
+                        this.aptDriver.getDisplacement()];
+                    index = index + 1;
+            end
+
+
+            'Pushing'
+
+            for step = 1:100
                 this.probe.collectData();
-                meanForce = this.probe.getMeanForce()
-                if (abs(meanForce) > 8 * forceThreshold)
+                meanForce = this.probe.getMeanForce();
+                if (abs(meanForce) > 60)
                     warning('Force too high returning home');
                     this.aptDriver.moveHome();
                     break;
@@ -481,6 +499,48 @@ classdef MainModel < handle
                 this.moveActiveMotor(fineStep);
                 index = index + 1;
             end
+
+            'Full Extend'
+            
+%             for i = 1:100
+%             this.probe.collectData();
+%                     meanForce = this.probe.getMeanForce();
+%                     data(index, :) = ...
+%                         [toc, meanForce, x, y,...
+%                         this.mvpDriver.getDisplacement(),...
+%                         this.aptDriver.getDisplacement()];
+%                     index = index + 1;
+%             end
+
+      %      'Retracting' 
+
+           for step = 1:100
+               this.probe.collectData();
+               meanForce = this.probe.getMeanForce();
+               if (abs(meanForce) > 60)
+                   warning('Force too high returning home');
+                   this.aptDriver.moveHome();
+                   break;
+               end
+               data(index, :) = ...
+                   [toc, meanForce, x, y,...
+                   this.mvpDriver.getDisplacement(),...
+                  this.aptDriver.getDisplacement()];
+              this.moveActiveMotor(-fineStep);
+               index = index + 1;
+           end
+%%
+  %          'Settleing'
+%
+ %           for i = 1:50
+  %          this.probe.collectData();
+   %                 meanForce = this.probe.getMeanForce()
+    %                data(index, :) = ...
+     %                   [toc, meanForce, x, y,...
+     %                   this.mvpDriver.getDisplacement(),...
+     %                   this.aptDriver.getDisplacement()];
+     %               index = index + 1;
+     %       end
 
             % Retract and complete sample
             this.aptDriver.moveHome();
@@ -495,12 +555,13 @@ classdef MainModel < handle
             ylabel('Force (uN)');
             title('Force vs Displacement');
             grid on;
-	    figure;
+            figure;
             plot(data(contactIndex:end,1), data(contactIndex:end,2));
             xlabel('Time (s)');
             ylabel('Force (uN)');
             title('Force vs Time');
             grid on;
+            save('probing_data', 'data', 'contactIndex');
         end
         
         function showLiveForce(this)
